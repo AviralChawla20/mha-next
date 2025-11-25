@@ -1,11 +1,22 @@
 'use client';
 
 import React, { useEffect, useMemo } from 'react';
-import { useRouter, useParams } from 'next/navigation'; // Changed imports
+import { useRouter, useParams } from 'next/navigation';
 import { ChevronLeft, AlertCircle, SkipBack, SkipForward } from 'lucide-react';
-import { animeData } from '@/data'; // Updated import
+import { animeData } from '@/data';
 
-// Define types for better TypeScript support (optional but good practice)
+// --- 1. DEFINE THE SHAPE OF YOUR DATA ---
+// This tells TypeScript: "videoUrl is optional (?)"
+interface AnimeEpisode {
+    title: string;
+    season: string;
+    episodeNumber: number;
+    videoUrl?: string; // <--- The ? makes it optional
+    theme?: string;
+    // This line below allows any other properties (like detail, type, etc.) without errors
+    [key: string]: any;
+}
+
 interface ThemeColors {
     text: string;
     bg: string;
@@ -14,14 +25,11 @@ interface ThemeColors {
 }
 
 export default function WatchPage() {
-    const router = useRouter(); // Changed: useNavigate -> useRouter
-
-    // 1. Get parameters. In Next.js, these match the folder names [seasonParam] and [episodeParam]
+    const router = useRouter();
     const params = useParams();
     const seasonParam = params.seasonParam as string;
     const episodeParam = params.episodeParam as string;
 
-    // Helper: Convert "Season 2" -> "s2"
     const formatSeasonToId = (seasonString: string) => {
         if (!seasonString) return '';
         return seasonString.toLowerCase()
@@ -30,26 +38,22 @@ export default function WatchPage() {
             .replace(/\s/g, '');
     };
 
-    // 2. Find the current episode based on URL params
     const currentEpisodeIndex = useMemo(() => {
         if (!seasonParam || !episodeParam) return -1;
 
         return animeData.findIndex((ep: any) => {
             const epSeasonId = formatSeasonToId(ep.season);
             const epNumString = `e${ep.episodeNumber}`;
-
-            // Handle case where URL might be just number (3) or formatted (e3)
             const paramEpMatch = episodeParam === epNumString || episodeParam === String(ep.episodeNumber);
-
             return epSeasonId === seasonParam && paramEpMatch;
         });
     }, [seasonParam, episodeParam]);
 
-    const episode = animeData[currentEpisodeIndex];
+    // --- 2. CAST THE DATA TO THE INTERFACE ---
+    // We treat 'episode' as 'AnimeEpisode' so TypeScript knows videoUrl might exist
+    const episode = animeData[currentEpisodeIndex] as AnimeEpisode;
 
-    // Redirect if invalid URL (episode not found)
     useEffect(() => {
-        // We add a small delay or check to ensure params are loaded
         if (seasonParam && episodeParam && currentEpisodeIndex === -1) {
             router.push('/anime');
         }
@@ -57,24 +61,23 @@ export default function WatchPage() {
 
     if (!episode) return null;
 
-    // Convert view link to preview link logic
+    // Now TypeScript is happy because we told it videoUrl is a string | undefined
     let embedUrl = episode.videoUrl;
+
     if (embedUrl && embedUrl.includes('drive.google.com') && embedUrl.includes('/view')) {
         embedUrl = embedUrl.replace('/view', '/preview');
     }
 
-    // 3. Handle Next/Prev Logic
     const handleNavigate = (direction: 'next' | 'prev') => {
         const nextIndex = direction === 'next' ? currentEpisodeIndex + 1 : currentEpisodeIndex - 1;
 
         if (nextIndex >= 0 && nextIndex < animeData.length) {
-            const nextEp = animeData[nextIndex];
+            // We also cast the next episode here to avoid errors on .season/.episodeNumber
+            const nextEp = animeData[nextIndex] as AnimeEpisode;
 
-            // Generate the new URL parts
-            const nextSeasonId = formatSeasonToId(nextEp.season); // e.g., "s2"
-            const nextEpId = `e${nextEp.episodeNumber}`; // e.g., "e3"
+            const nextSeasonId = formatSeasonToId(nextEp.season);
+            const nextEpId = `e${nextEp.episodeNumber}`;
 
-            // Navigate to the new URL
             router.push(`/watch/${nextSeasonId}/${nextEpId}`);
         }
     };
@@ -95,7 +98,6 @@ export default function WatchPage() {
 
     return (
         <div className="min-h-screen w-full flex flex-col bg-black overflow-y-auto">
-            {/* Header */}
             <div className="w-full p-4 z-50 flex justify-between items-center bg-slate-900 border-b border-white/10 sticky top-0 shadow-lg">
                 <button
                     onClick={() => router.push('/anime')}
@@ -110,7 +112,6 @@ export default function WatchPage() {
                 </div>
             </div>
 
-            {/* Player Container */}
             <div className="flex-1 flex flex-col items-center justify-center w-full py-8 px-4 md:px-8">
                 {embedUrl ? (
                     <div className="w-full max-w-5xl aspect-video relative rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/10">
@@ -134,12 +135,10 @@ export default function WatchPage() {
                 <h1 className="md:hidden text-white font-black uppercase italic text-xl mt-6 text-center">{episode.title}</h1>
             </div>
 
-            {/* Footer / Navigation */}
             <div className="w-full bg-slate-900 border-t border-white/10 p-4 md:p-6 z-20 mt-auto">
                 <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
                     <button
                         onClick={() => handleNavigate('prev')}
-                        // Disable if we are at the very first item in the array
                         disabled={currentEpisodeIndex === 0}
                         className="flex items-center gap-2 px-4 py-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-white transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -156,7 +155,6 @@ export default function WatchPage() {
 
                     <button
                         onClick={() => handleNavigate('next')}
-                        // Disable if we are at the very last item in the array
                         disabled={currentEpisodeIndex === animeData.length - 1}
                         className={`flex items-center gap-2 px-4 py-3 rounded-lg ${themeColors.bg} ${themeColors.hoverBg} text-white transition-all active:scale-95 shadow-lg ${themeColors.shadow} disabled:opacity-50 disabled:cursor-not-allowed`}
                     >

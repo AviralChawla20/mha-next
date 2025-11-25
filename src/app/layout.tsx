@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "My Hero Timeline", // <--- (Optional) Update your title here
+  title: "My Hero Archives", // <--- (Optional) Update your title here
   description: "The Ultimate Guide",
 };
 

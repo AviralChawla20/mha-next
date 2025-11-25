@@ -666,6 +666,7 @@ export const season4Data = [
     season: "Season 4",
     episodeNumber: 64,
     theme: "emerald",
+    videoUrl:""
   },
   {
     title: "Overhaul",
@@ -673,7 +674,8 @@ export const season4Data = [
     type: "episode",
     season: "Season 4",
     episodeNumber: 65,
-    theme: "emerald",
+      theme: "emerald",
+    videoUrl:""
   },
   {
     title: "Boy Meets...",
@@ -681,7 +683,8 @@ export const season4Data = [
     type: "episode",
     season: "Season 4",
     episodeNumber: 66,
-    theme: "emerald",
+      theme: "emerald",
+    
   },
   {
     title: "Fighting Fate",
