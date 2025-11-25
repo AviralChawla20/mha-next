@@ -1,13 +1,80 @@
-'use client'; // <--- CRITICAL: This tells Next.js this file has interactivity
+'use client';
 
-import React from 'react';
-import { useRouter } from 'next/navigation'; // Changed from 'react-router-dom'
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@/utils/supabase/client';
 import { Tv, BookOpen, Library, ChevronRight } from 'lucide-react';
+import AuthButton from '@/components/AuthButton'; // Make sure this is imported
 
 export default function Home() {
-  // Changed: Next.js uses useRouter, not useNavigate
   const router = useRouter();
+  const supabase = createClient();
 
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Check initial user
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      setLoading(false);
+    };
+    checkUser();
+
+    // Listen for changes (like if they click Logout)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase]);
+
+  // --- LOADING STATE (Prevents flashing) ---
+  if (loading) {
+    return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white">Loading Archives...</div>;
+  }
+
+  // ==========================================
+  // STATE 1: LOGGED OUT (WELCOME SCREEN)
+  // ==========================================
+  if (!user) {
+    return (
+      <div className="min-h-screen w-full bg-slate-900 flex flex-col items-center justify-center relative overflow-hidden font-sans text-white">
+        {/* Simple Background */}
+        <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black"></div>
+
+        <div className="relative z-10 flex flex-col items-center text-center p-6 animate-[fadeIn_1s_ease-out]">
+          <div className="w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(250,204,21,0.4)]">
+            <span className="text-slate-900 font-black text-3xl">UA</span>
+          </div>
+
+          <h1 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter mb-4">
+            Welcome Hero
+          </h1>
+
+          <p className="text-slate-400 text-lg max-w-md mb-8">
+            Access the ultimate archive of My Hero Academia.
+            Sign in to track your progress and view the database.
+          </p>
+
+          {/* BIG SIGN IN BUTTON */}
+          <div className="scale-125">
+            <AuthButton allowSignIn={true} />
+          </div>
+        </div>
+
+        <div className="absolute bottom-6 text-slate-600 text-xs font-mono uppercase">
+          Restricted Access • UA High Server
+        </div>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // STATE 2: LOGGED IN (DASHBOARD)
+  // This is your original code
+  // ==========================================
   const izukuImg = "https://i.ibb.co/kVfwwv7p/Izuku-Midoriya.png";
   const allMightImg = "https://i.ibb.co/Y4mSbpt6/Adobe-Express-file.png";
 
@@ -19,7 +86,6 @@ export default function Home() {
 
       {/* Character Images */}
       <div className="absolute bottom-0 left-0 md:-left-10 w-1/2 md:w-1/3 h-2/3 md:h-full z-10 opacity-80 pointer-events-none transition-transform hover:scale-105 duration-700">
-        {/* Note: We are keeping standard <img> tags for simplicity with external URLs */}
         <img src={izukuImg} alt="Izuku" className="w-full h-full object-contain object-bottom drop-shadow-[0_0_15px_rgba(52,211,153,0.5)]" />
       </div>
       <div className="absolute bottom-0 right-0 md:-right-10 w-1/2 md:w-1/3 h-2/3 md:h-full z-10 opacity-80 pointer-events-none transition-transform hover:scale-105 duration-700">
@@ -46,7 +112,7 @@ export default function Home() {
 
           {/* Anime Button */}
           <button
-            onClick={() => router.push('/anime')} // Changed: navigate -> router.push
+            onClick={() => router.push('/anime')}
             className="group relative bg-gradient-to-br from-yellow-400 to-orange-500 p-1 rounded-2xl transform transition-all duration-300 hover:scale-105 hover:rotate-1 shadow-xl hover:shadow-yellow-400/30"
           >
             <div className="bg-slate-900 h-full w-full rounded-xl px-6 py-6 flex flex-col items-start justify-between group-hover:bg-slate-800 transition-colors min-h-[140px]">

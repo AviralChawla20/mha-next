@@ -4,16 +4,17 @@ import { createClient } from '@/utils/supabase/client';
 import { useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { LogOut, User as UserIcon } from 'lucide-react';
+import { useRouter } from 'next/navigation'; // <--- 1. IMPORT ROUTER
 
-// New Prop Interface
 interface AuthButtonProps {
-    allowSignIn?: boolean; // Controls if "Sign In" button is visible
-    className?: string;    // Allows us to style it from the parent
+    allowSignIn?: boolean;
+    className?: string;
 }
 
 export default function AuthButton({ allowSignIn = true, className = '' }: AuthButtonProps) {
     const [user, setUser] = useState<User | null>(null);
     const supabase = createClient();
+    const router = useRouter(); // <--- 2. INITIALIZE ROUTER
 
     useEffect(() => {
         const getUser = async () => {
@@ -40,9 +41,10 @@ export default function AuthButton({ allowSignIn = true, className = '' }: AuthB
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
+        router.push('/'); // <--- 3. REDIRECT TO HOME
+        router.refresh(); // <--- 4. FORCE REFRESH (Optional, clears server cache)
     };
 
-    // 1. IF USER IS LOGGED IN: Always show the Profile/Logout
     if (user) {
         return (
             <div className={`flex items-center gap-3 ${className}`}>
@@ -74,7 +76,6 @@ export default function AuthButton({ allowSignIn = true, className = '' }: AuthB
         );
     }
 
-    // 2. IF LOGGED OUT: Only show button if allowSignIn is true
     if (allowSignIn) {
         return (
             <div className={className}>
@@ -89,6 +90,5 @@ export default function AuthButton({ allowSignIn = true, className = '' }: AuthB
         );
     }
 
-    // 3. Otherwise return nothing
     return null;
 }
