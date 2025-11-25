@@ -51,8 +51,146 @@ body {
   perspective: 1000px;
 }
 /* FROM YOUR APP.JSX */
-.hide-scrollbar::-webkit-scrollbar { display: none; }
-.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
 
-@keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-@keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ... your existing foil classes ... */
+
+/* DEFINE THE MOVING ANIMATION */
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Silver Foil */
+.bg-foil-silver {
+  background-image: linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 25%,
+    rgba(192, 192, 192, 0.6) 45%,
+    rgba(255, 255, 255, 0.9) 50%,
+    /* Bright Flash */ rgba(192, 192, 192, 0.6) 55%,
+    rgba(255, 255, 255, 0.1) 75%,
+    transparent 100%
+  );
+  background-size: 200% 100%; /* Important for movement */
+  mix-blend-mode: overlay;
+}
+
+/* Rainbow Gold Foil */
+.bg-foil-rainbow {
+  background-image: linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(255, 215, 0, 0.3) 15%,
+    rgba(255, 0, 0, 0.5) 30%,
+    rgba(255, 255, 0, 0.5) 45%,
+    rgba(0, 255, 255, 0.5) 60%,
+    rgba(255, 215, 0, 0.8) 75%,
+    /* Bright Gold Flash */ rgba(255, 0, 255, 0.4) 90%,
+    transparent 100%
+  );
+  background-size: 200% 100%; /* Important for movement */
+  mix-blend-mode: color-dodge;
+}
+/* --- MISSION CONTROL ANIMATIONS --- */
+
+/* 1. The vertical scanning beam */
+@keyframes scanline {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+.animate-scanline {
+  animation: scanline 8s linear infinite;
+}
+
+/* 2. Slow rotation for HUD rings */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
+}
+
+/* 3. Reverse rotation */
+@keyframes spin-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+.animate-spin-reverse {
+  animation: spin-reverse 25s linear infinite;
+}
+
+/* 4. Blinking text/lights */
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+.animate-blink {
+  animation: blink 2s infinite;
+}
+
+/* 5. A Tech Grid Background Pattern */
+.bg-tech-grid {
+  background-size: 50px 50px;
+  background-image: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+}
