@@ -2694,4 +2694,37 @@ export const libraryData = [
     description:
       "The final showdown in the streets of Naruhata reaches its climax as the monstrous Number 6 goes all out to destroy Koichi. All his life, Koichi dreamed of being a hero. When he realized that wasn’t going to happen, he moved on. But now, fighting against the terrifying Number 6, his dream is all he’s got to hold on to. If Koichi can tap into the real source of his power, he may at last become the hero he always wanted to be.",
   },
+  {
+    id: "volua1",
+    title: "Ultra Archive",
+    image: "https://m.media-amazon.com/images/I/71kUmXli6OL._SL1200_.jpg",
+    author: "Kohei Horikoshi",
+    date: "2 May 2016",
+    category: "Data Book",
+    language: "Japanese",
+    description:
+      "Packed with detailed data!! The first official character book for “My Hero Academia” has arrived!! Everything about HeroAca is in this one book — it’s truly All Might!!! The ultimate super record book is here!! Includes a brand-new manga drawn by Horikoshi-sensei!! Also features a complete collection of his Twitter illustrations!! Contains a special interview with anime character designer Yoshihiko Umakoshi!! Reveals ultra-rare setting materials for the first time, including many documents from before the series began!! Also includes a new manga by Neda-sensei, creator of “Smash!!” Remove the cover to find a Villain-version fully colored illustration underneath!!",
+  },
+  {
+    id: "volua2",
+    title: "Ultra Analysis",
+    image: "https://m.media-amazon.com/images/I/91ag4H3UX0L._SL1500_.jpg",
+    author: "Kohei Horikoshi",
+    date: "2 November 2021",
+    category: "Data Book",
+    language: "English",
+    description:
+      "The secrets of the smash-hit series My Hero Academia are revealed! My Hero Academia: Ultra Analysis—The Official Character Guide is jam-packed with all the profiles, stats, and trivia about your favorite heroes—plus a color art gallery, sketches, and a team-up discussion featuring My Hero Academia creator Kohei Horikoshi in conversation with Bleach creator Tite Kubo!",
+  },
+  {
+    id: "volua3",
+    title: "Ultra Age",
+    image: "https://m.media-amazon.com/images/I/71WeC1s9u3L._SL1200_.jpg",
+    author: "Kohei Horikoshi",
+    date: "2 May 2025",
+    category: "Data Book",
+    language: "Japanese",
+    description:
+      "As the culmination of ten years of serialization, the final fanbook of “My Hero Academia” is here, fully packed with information! In addition to over 100 characters, it thoroughly explains the world of “HeroAca,” including Quirks, special moves, and more. It also features relay interviews with past editors and a Q&A section that digs deep into creator Kōhei Horikoshi himself. At the end of the book, you’ll find an exclusive short one-shot included only in this volume!",
+  },
 ];
