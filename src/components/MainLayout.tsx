@@ -50,17 +50,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             <div className="absolute inset-0 z-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
             <div className={`absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none transition-all duration-700 ${getBgClass()}`}></div>
 
-            {/* --- 1. HOME PAGE SPECIFIC AUTH BUTTON (Floating) --- */}
-            {isHome && (
-                <div className="absolute top-6 right-6 z-50 animate-[fadeIn_1s_ease-out]">
-                    {/* allowSignIn={true} because this is the only place to log in */}
-                    <AuthButton allowSignIn={true} />
-                </div>
-            )}
-
-            {/* --- 2. INNER PAGE NAVBAR --- */}
+            {/* --- CHANGE 1: Header is now FIXED to the top of the viewport --- */}
             {!isHome && !isWatch && (
-                <header className="relative z-20 flex flex-col md:flex-row items-center justify-between px-6 py-4 bg-slate-950/80 backdrop-blur-md border-b border-white/10 shadow-xl">
+                <header className="fixed top-0 left-0 right-0 z-50 flex flex-col md:flex-row items-center justify-between px-6 py-4 bg-slate-950/80 backdrop-blur-md border-b border-white/10 shadow-xl">
 
                     <Link href="/" className="flex items-center gap-3 mb-4 md:mb-0 cursor-pointer group">
                         <div className={`p-2 rounded-full ${isAnime ? 'bg-yellow-400' : isManga ? 'bg-emerald-500' : 'bg-pink-500'} text-slate-900 font-black text-xl group-hover:scale-110 transition-transform`}>
@@ -94,7 +86,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                             </Link>
                         </div>
 
-                        {/* --- 3. INNER PAGE AUTH (Only shows if logged in) --- */}
+                        {/* Auth Button */}
                         <div className="hidden md:block border-l border-white/10 pl-4 min-w-[50px]">
                             <AuthButton allowSignIn={false} />
                         </div>
@@ -103,9 +95,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 </header>
             )}
 
+            {/* --- CHANGE 2: Main container has Padding Top (pt-24) to account for fixed header --- */}
             <main
                 ref={mainRef}
-                className={`relative z-10 w-full h-full ${!isHome && !isWatch ? 'h-[calc(100vh-80px)]' : 'h-screen'} overflow-y-auto scroll-smooth perspective-container hide-scrollbar`}
+                className={`relative z-10 w-full h-full overflow-y-auto scroll-smooth perspective-container hide-scrollbar ${!isHome && !isWatch ? 'pt-24 md:pt-28' : ''}`}
             >
                 {children}
             </main>

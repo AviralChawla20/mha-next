@@ -1,7 +1,7 @@
-'use client'; // <--- Critical: Required for Hooks and IntersectionObserver
+'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { BookOpen, Tv, Star, Zap, Circle, Film, Book, AlertCircle, Play } from 'lucide-react';
+import { BookOpen, Tv, Star, Zap, Circle, Film, Book, AlertCircle, Play, CheckCircle } from 'lucide-react';
 
 // Define the shape of your Item data to satisfy TypeScript
 interface TimelineItem {
@@ -24,6 +24,7 @@ interface TimelineCardProps {
     shadowColor: string;
     themeColor: string;
     onClick?: (item: TimelineItem) => void;
+    isWatched?: boolean;
 }
 
 const TimelineCard = ({
@@ -33,7 +34,8 @@ const TimelineCard = ({
     textColor,
     shadowColor,
     themeColor,
-    onClick
+    onClick,
+    isWatched = false
 }: TimelineCardProps) => {
 
     const cardRef = useRef<HTMLDivElement>(null);
@@ -89,7 +91,6 @@ const TimelineCard = ({
     };
 
     const getThemeMap = (theme: string) => {
-        // Returns a set of colors for a specific theme
         const maps: Record<string, any> = {
             'blue': { border: 'border-blue-500', shadow: 'shadow-blue-500/50', bg: 'bg-blue-500', badge: 'bg-blue-500 border-blue-400', text: 'text-blue-400' },
             'red': { border: 'border-red-600', shadow: 'shadow-red-600/50', bg: 'bg-red-600', badge: 'bg-red-600 border-red-400', text: 'text-red-500' },
@@ -104,7 +105,6 @@ const TimelineCard = ({
         return maps[theme] || null;
     };
 
-    // Determine active colors: Use Item Theme if exists, otherwise fall back to Parent Props
     const itemThemeColors = item.theme ? getThemeMap(item.theme) : null;
 
     const activeBorderColor = itemThemeColors ? itemThemeColors.border : borderColor;
@@ -112,9 +112,7 @@ const TimelineCard = ({
     const activeBgColor = itemThemeColors ? itemThemeColors.bg : themeColor;
     const activeTextColor = itemThemeColors ? itemThemeColors.text : textColor;
 
-    // Function to determine badge style, allowing overrides from item.theme
     const getBadgeColor = (type: string, themeOverride?: string) => {
-        // Maps defined themes to Tailwind classes
         const themeMap: Record<string, string> = {
             'blue': 'bg-blue-500 text-white border-blue-400',
             'red': 'bg-red-600 text-white border-red-400',
@@ -161,15 +159,16 @@ const TimelineCard = ({
     const currentOpacity = isHovered ? 1 : scrollOpacity;
     const currentZIndex = isHovered ? 50 : (isVisible ? 10 : 0);
 
-    const activeStyle = (isVisible || isHovered)
-        ? `border-4 ${activeBorderColor} ${activeShadowColor} shadow-[0_0_50px_-10px_rgba(0,0,0,0.3)] bg-slate-900`
-        : 'border border-white/10 bg-slate-900/50 grayscale-[0.5]';
-
-    const isPlayable = item.type === 'episode' || item.type === 'movie' || item.type === 'special';
-    const cursorClass = isPlayable ? 'cursor-pointer' : 'cursor-default';
-
-    // Use custom text color if theme is present on episode, otherwise fallback to prop
+    const displayBorderColor = activeBorderColor;
+    const displayShadowColor = activeShadowColor;
     const displayTextColor = item.theme ? getTextColor(item.theme) : textColor;
+
+    const activeStyle = (isVisible || isHovered)
+        ? `border-4 ${displayBorderColor} ${displayShadowColor} shadow-[0_0_50px_-10px_rgba(0,0,0,0.3)] bg-slate-900`
+        : `border border-white/10 bg-slate-900/50 ${isWatched ? 'grayscale opacity-50' : 'grayscale-[0.5]'}`;
+
+    const isPlayable = item.type === 'episode' || item.type === 'movie' || item.type === 'special' || item.type === 'volume';
+    const cursorClass = isPlayable ? 'cursor-pointer' : 'cursor-default';
 
     return (
         <div
@@ -187,6 +186,15 @@ const TimelineCard = ({
             <div
                 className={`w-full p-6 rounded-3xl relative overflow-hidden group ${activeStyle} transition-colors duration-300`}
             >
+                {/* COMPLETED STAMP */}
+                {isWatched && (
+                    <div className="absolute -right-4 top-10 opacity-20 group-hover:opacity-100 transition-opacity duration-500 rotate-12 pointer-events-none">
+                        <div className="border-4 border-double border-emerald-500 rounded-lg px-4 py-1 bg-emerald-950/30 backdrop-blur-sm">
+                            <span className="text-emerald-500 font-black font-serif text-4xl uppercase tracking-widest opacity-80">COMPLETED</span>
+                        </div>
+                    </div>
+                )}
+
                 {(isVisible || isHovered) && (
                     <div className="absolute top-0 right-0 w-32 h-32 opacity-10 bg-[radial-gradient(circle,_var(--tw-gradient-stops))] from-white to-transparent" style={{ backgroundSize: '4px 4px' }}></div>
                 )}
@@ -196,19 +204,32 @@ const TimelineCard = ({
                         #{String(index + 1).padStart(3, '0')}
                     </div>
 
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg border-2 ${getBadgeColor(item.type, item.theme)} transition-transform duration-500 ${(isVisible || isHovered) ? 'rotate-[-10deg] scale-110' : 'rotate-0'}`}>
-                        {getIcon(item.type)}
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg border-2 transition-colors duration-300 
+                        ${isWatched
+                            ? 'bg-emerald-500 border-emerald-400 text-white'
+                            : getBadgeColor(item.type, item.theme)} 
+                        ${(isVisible || isHovered) ? 'rotate-[-10deg] scale-110' : 'rotate-0'}`
+                    }>
+                        {isWatched ? <CheckCircle size={24} strokeWidth={3} /> : getIcon(item.type)}
                     </div>
 
                     <div className="flex-1">
                         <div className="flex flex-wrap items-center gap-2 mb-1">
-                            <span className={`text-[10px] uppercase font-bold tracking-wider py-0.5 px-2 rounded border ${getBadgeColor(item.type, item.theme)}`}>
+                            <span className={`text-[10px] uppercase font-bold tracking-wider py-0.5 px-2 rounded border 
+                                ${isWatched ? 'bg-emerald-900/50 border-emerald-500 text-emerald-400' : getBadgeColor(item.type, item.theme)}`
+                            }>
                                 {item.type === 'episode' ? item.season : item.type}
                             </span>
 
-                            {isPlayable && isHovered && (
+                            {isWatched && (
+                                <span className="text-[10px] uppercase font-bold tracking-wider py-0.5 px-2 rounded bg-emerald-500 text-white">
+                                    Archived
+                                </span>
+                            )}
+
+                            {isPlayable && isHovered && !isWatched && (
                                 <span className="text-[10px] uppercase font-bold tracking-wider py-0.5 px-2 rounded bg-white text-black animate-pulse">
-                                    Click to Watch
+                                    Click to Read
                                 </span>
                             )}
 
@@ -219,12 +240,15 @@ const TimelineCard = ({
                             )}
                         </div>
 
-                        <h3 className={`text-xl md:text-2xl font-black uppercase tracking-tight leading-none mb-1 ${(isVisible || isHovered) ? 'text-white' : 'text-slate-300'}`}>
+                        <h3 className={`text-xl md:text-2xl font-black uppercase tracking-tight leading-none mb-1 transition-colors 
+                            ${(isVisible || isHovered) ? 'text-white' : 'text-slate-300'}
+                            ${isWatched ? 'text-slate-400 line-through decoration-4 decoration-emerald-500' : ''}`
+                        }>
                             {item.title}
                         </h3>
 
                         {item.type === 'episode' ? (
-                            <p className={`font-medium ${(isVisible || isHovered) ? displayTextColor : 'text-slate-500'}`}>
+                            <p className={`font-medium ${displayTextColor}`}>
                                 Episode {item.episodeNumber}
                             </p>
                         ) : (
@@ -241,9 +265,13 @@ const TimelineCard = ({
                     </div>
                 </div>
 
-                {/* Bottom Shimmer Bar */}
                 {(isVisible || isHovered) && (
                     <div className={`absolute bottom-0 left-0 h-1 w-full ${activeBgColor} animate-[shimmer_2s_infinite]`}></div>
+                )}
+
+                {/* CHANGED: Now uses activeBgColor instead of bg-emerald-500 */}
+                {isWatched && (
+                    <div className={`absolute bottom-0 left-0 h-1 ${activeBgColor} w-full opacity-50`}></div>
                 )}
             </div>
         </div>
