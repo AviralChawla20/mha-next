@@ -81,19 +81,26 @@ const TimelineCard = ({
             case 'movie': return <Film size={18} />;
             case 'season': return <Tv size={18} />;
             case 'episode': return <Play size={18} fill="currentColor" />;
-            case 'volume': return <Book size={18} />;
+            case 'light novel': return <Book size={18} />;
             case 'saga': return <Zap size={18} />;
             case 'special': return <Star size={18} />;
             case 'spin-off': return <AlertCircle size={18} />;
-            case 'novel': return <BookOpen size={18} />;
+            case 'manga': return <BookOpen size={18} />;
             default: return <Circle size={18} />;
         }
     };
 
     const getThemeMap = (theme: string) => {
         const maps: Record<string, any> = {
+            'lightBlue': {
+                border: 'border-sky-400',
+                shadow: 'shadow-sky-400/50',
+                bg: 'bg-sky-400',
+                badge: 'bg-sky-400 border-sky-300',
+                text: 'text-sky-300'
+            },
             'blue': { border: 'border-blue-500', shadow: 'shadow-blue-500/50', bg: 'bg-blue-500', badge: 'bg-blue-500 border-blue-400', text: 'text-blue-400' },
-            'red': { border: 'border-red-600', shadow: 'shadow-red-600/50', bg: 'bg-red-600', badge: 'bg-red-600 border-red-400', text: 'text-red-500' },
+            'red': { border: 'border-red-500', shadow: 'shadow-red-500/50', bg: 'bg-red-500', badge: 'bg-red-500 border-red-400', text: 'text-red-500' },
             'emerald': { border: 'border-emerald-500', shadow: 'shadow-emerald-500/50', bg: 'bg-emerald-500', badge: 'bg-emerald-500 border-emerald-400', text: 'text-emerald-400' },
             'purple': { border: 'border-purple-500', shadow: 'shadow-purple-500/50', bg: 'bg-purple-500', badge: 'bg-purple-600 border-purple-400', text: 'text-purple-400' },
             'zinc': { border: 'border-slate-500', shadow: 'shadow-slate-500/50', bg: 'bg-slate-500', badge: 'bg-slate-600 border-slate-400', text: 'text-slate-400' },
@@ -101,6 +108,8 @@ const TimelineCard = ({
             'pink': { border: 'border-pink-500', shadow: 'shadow-pink-500/50', bg: 'bg-pink-500', badge: 'bg-pink-500 border-pink-300', text: 'text-pink-400' },
             'lime': { border: 'border-lime-500', shadow: 'shadow-lime-500/50', bg: 'bg-lime-500', badge: 'bg-lime-500 border-lime-300', text: 'text-lime-400' },
             'yellow': { border: 'border-yellow-400', shadow: 'shadow-yellow-400/50', bg: 'bg-yellow-400', badge: 'bg-yellow-500 border-yellow-300', text: 'text-yellow-400' },
+            'white': { border: 'border-white-400', shadow: 'shadow-white-400/50', bg: 'bg-white-400', badge: 'bg-white-500 border-white-300', text: 'text-white-400' },
+            'brown': { border: 'border-amber-950', shadow: 'shadow-amber-950/50', bg: 'bg-amber-950', badge: 'bg-amber-950 border-amber-950', text: 'text-amber-950' },
         };
         return maps[theme] || null;
     };
@@ -115,14 +124,17 @@ const TimelineCard = ({
     const getBadgeColor = (type: string, themeOverride?: string) => {
         const themeMap: Record<string, string> = {
             'blue': 'bg-blue-500 text-white border-blue-400',
-            'red': 'bg-red-600 text-white border-red-400',
+            'lightBlue': 'bg-sky-500 text-white border-sky-400',
+            'red': 'bg-red-600 text-white border-red-300',
             'emerald': 'bg-emerald-500 text-white border-emerald-400',
             'purple': 'bg-purple-600 text-white border-purple-400',
             'zinc': 'bg-slate-600 text-white border-slate-400',
             'orange': 'bg-orange-500 text-white border-orange-300',
             'yellow': 'bg-yellow-500 text-black border-yellow-300',
             'pink': 'bg-pink-500 text-white border-pink-400',
-            'lime': 'bg-lime-500 text-white border-lime-400'
+            'lime': 'bg-lime-500 text-white border-lime-400',
+            'white': 'bg-white-500 text-white border-white-400',
+            'brown': 'bg-amber-950 text-white border-amber-950',
         };
 
         if (themeOverride && themeMap[themeOverride]) {
@@ -145,12 +157,15 @@ const TimelineCard = ({
     const getTextColor = (theme: string) => {
         const map: Record<string, string> = {
             'blue': 'text-blue-400',
-            'red': 'text-red-500',
+            'lightBlue':'text-sky-200',
+            'red': 'text-red-300',
             'emerald': 'text-emerald-400',
             'purple': 'text-purple-400',
             'zinc': 'text-slate-400',
             'orange': 'text-orange-400',
             'yellow': 'text-yellow-400',
+            'white': 'text-white-400',
+            'brown': 'text-amber-900',
         };
         return map[theme] || textColor;
     }
@@ -167,7 +182,7 @@ const TimelineCard = ({
         ? `border-4 ${displayBorderColor} ${displayShadowColor} shadow-[0_0_50px_-10px_rgba(0,0,0,0.3)] bg-slate-900`
         : `border border-white/10 bg-slate-900/50 ${isWatched ? 'grayscale opacity-50' : 'grayscale-[0.5]'}`;
 
-    const isPlayable = item.type === 'episode' || item.type === 'movie' || item.type === 'special' || item.type === 'volume';
+    const isPlayable = item.type === 'episode' || item.type === 'movie' || item.type === 'special' || item.type === 'manga';
     const cursorClass = isPlayable ? 'cursor-pointer' : 'cursor-default';
 
     return (

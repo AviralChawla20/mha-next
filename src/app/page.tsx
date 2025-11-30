@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { Tv, BookOpen, Library, Star, Zap, Shield, Database, Activity, Wifi, Crosshair, Cpu } from 'lucide-react';
 import AuthButton from '@/components/AuthButton';
-// 1. IMPORT mangaData
 import { libraryData, animeData, mangaData } from '@/data';
 
 export default function Home() {
@@ -18,7 +17,6 @@ export default function Home() {
   // Stats State
   const [libraryStats, setLibraryStats] = useState({ owned: 0, total: 0, percentage: 0 });
   const [animeStats, setAnimeStats] = useState({ watched: 0, total: 0, percentage: 0 });
-  // 2. NEW MANGA STATS STATE
   const [mangaStats, setMangaStats] = useState({ read: 0, total: 0, percentage: 0 });
 
   // Current Time for the HUD
@@ -53,7 +51,7 @@ export default function Home() {
         const animePercentage = animeTotal > 0 ? Math.round((watched / animeTotal) * 100) : 0;
         setAnimeStats({ watched, total: animeTotal, percentage: animePercentage });
 
-        // --- 3. Fetch Manga Stats (NEW) ---
+        // --- 3. Fetch Manga Stats ---
         const { count: mangaCount } = await supabase
           .from('user_manga')
           .select('*', { count: 'exact', head: true })
@@ -75,7 +73,7 @@ export default function Home() {
     };
   }, [supabase]);
 
-  // --- RANK LOGIC (Generic) ---
+  // --- RANK LOGIC ---
   const getRank = (pct: number) => {
     if (pct === 100) return { label: 'PLUS ULTRA', color: 'text-pink-500', stars: 5 };
     if (pct >= 80) return { label: 'LEGENDARY', color: 'text-pink-400', stars: 5 };
@@ -87,7 +85,7 @@ export default function Home() {
 
   const libRank = getRank(libraryStats.percentage);
   const animeRank = getRank(animeStats.percentage);
-  const mangaRank = getRank(mangaStats.percentage); // <--- Manga Rank
+  const mangaRank = getRank(mangaStats.percentage);
 
   // --- FOIL LOGIC ---
   const getFoilClass = (pct: number) => {
@@ -98,7 +96,7 @@ export default function Home() {
 
   const libFoil = getFoilClass(libraryStats.percentage);
   const animeFoil = getFoilClass(animeStats.percentage);
-  const mangaFoil = getFoilClass(mangaStats.percentage); // <--- Manga Foil
+  const mangaFoil = getFoilClass(mangaStats.percentage);
 
   if (loading) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-cyan-500 font-mono">INITIALIZING SYSTEM...</div>;
 
@@ -135,6 +133,11 @@ export default function Home() {
         <img src="/hud.png" alt="Schematic Background" className="w-full h-full object-cover" />
       </div>
 
+      {/* --- AUTH BUTTON (RESTORED) --- */}
+      <div className="absolute top-6 right-6 z-50">
+        <AuthButton />
+      </div>
+
       {/* HUD Elements */}
       <div className="absolute top-0 left-0 p-8 z-10 hidden md:block pointer-events-none">
         <div className="flex items-center gap-2 text-cyan-400 mb-1"><Activity size={16} className="animate-pulse" /><span className="font-mono text-xs tracking-widest">SYSTEM ONLINE</span></div>
@@ -166,12 +169,10 @@ export default function Home() {
         {/* CARDS GRID */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl mx-auto px-4 perspective-container">
 
-          {/* 1. ANIME CARD (DYNAMIC) */}
+          {/* 1. ANIME CARD */}
           <button onClick={() => router.push('/anime')} className="group relative h-[400px] w-full bg-slate-900/80 backdrop-blur-sm rounded-3xl border border-yellow-500/30 hover:border-yellow-400 transition-all duration-500 hover:-translate-y-4 hover:shadow-[0_0_30px_rgba(250,204,21,0.3)] overflow-hidden">
             <div className="absolute inset-0 bg-tech-grid opacity-10"></div>
             <div className="absolute inset-0 bg-gradient-to-t from-yellow-500/10 to-transparent opacity-50 group-hover:opacity-80 transition-opacity"></div>
-
-            {/* FOIL LAYER */}
             <div className={`absolute inset-0 z-0 pointer-events-none ${animeFoil}`}></div>
 
             <div className="relative z-10 h-full flex flex-col justify-between p-6">
@@ -195,12 +196,10 @@ export default function Home() {
             </div>
           </button>
 
-          {/* 2. MANGA CARD (DYNAMIC) */}
+          {/* 2. MANGA CARD */}
           <button onClick={() => router.push('/manga')} className="group relative h-[400px] w-full bg-slate-900/80 backdrop-blur-sm rounded-3xl border border-emerald-500/30 hover:border-emerald-400 transition-all duration-500 hover:-translate-y-4 hover:shadow-[0_0_30px_rgba(52,211,153,0.3)] overflow-hidden">
             <div className="absolute inset-0 bg-tech-grid opacity-10"></div>
             <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/10 to-transparent opacity-50 group-hover:opacity-80 transition-opacity"></div>
-
-            {/* FOIL LAYER */}
             <div className={`absolute inset-0 z-0 pointer-events-none ${mangaFoil}`}></div>
 
             <div className="relative z-10 h-full flex flex-col justify-between p-6">
@@ -224,12 +223,10 @@ export default function Home() {
             </div>
           </button>
 
-          {/* 3. LIBRARY CARD (DYNAMIC) */}
+          {/* 3. LIBRARY CARD */}
           <button onClick={() => router.push('/library')} className="group relative h-[400px] w-full bg-slate-900/80 backdrop-blur-sm rounded-3xl border border-pink-500/30 hover:border-pink-500 transition-all duration-500 hover:-translate-y-4 hover:shadow-[0_0_30px_rgba(236,72,153,0.3)] overflow-hidden">
             <div className="absolute inset-0 bg-tech-grid opacity-10"></div>
             <div className="absolute inset-0 bg-gradient-to-t from-pink-500/10 to-transparent opacity-50 group-hover:opacity-80 transition-opacity"></div>
-
-            {/* FOIL LAYER */}
             <div className={`absolute inset-0 z-0 pointer-events-none ${libFoil}`}></div>
 
             <div className="relative z-10 h-full flex flex-col justify-between p-6">
@@ -243,6 +240,25 @@ export default function Home() {
           </button>
 
         </div>
+      </div>
+
+      {/* --- IZUKU PEEKING COMPONENT (UPDATED) --- */}
+      <div
+        onClick={() => router.push('/characters')}
+        className="fixed -bottom-12 -right-12 z-50 group cursor-pointer"
+      >
+        {/* Comic Chat Bubble Image */}
+        <div className="absolute bottom-full right-[45%] mb-[-5px] transform scale-0 group-hover:scale-100 transition-transform duration-300 origin-bottom-right drop-shadow-lg">
+          <img src="/comic-bubble.png" alt="Psstt.." className="w-32 h-auto" />
+          <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[65%] text-black font-black italic text-base">Psstt..</span>
+        </div>
+
+        {/* Izuku Image (Smaller & Hidden) */}
+        <img
+          src="/izuku-peek.webp"
+          alt="Izuku"
+          className="w-24 md:w-32 h-auto object-contain transform translate-y-12 translate-x-8 rotate-[-20deg] group-hover:translate-y-4 group-hover:translate-x-4 group-hover:rotate-[-20deg] transition-all duration-500 ease-out drop-shadow-2xl"
+        />
       </div>
 
       {/* Footer System Status */}
