@@ -194,3 +194,58 @@ body {
     ),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
 }
+
+.clip-hexagon {
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+}
+
+/* Vertical Text Support */
+.writing-vertical-rl {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+}
+
+/* globals.css */
+
+/* =========================================
+   Custom Video Subtitle Styling
+========================================= */
+
+/* 1. Target the subtitle cue container */
+/* globals.css */
+
+/* =========================================
+   1. Standard Cue Styling
+========================================= */
+video::cue {
+  background-color: transparent !important;
+  background: transparent !important;
+
+  /* Text Styling */
+  color: #ffffff;
+  font-family: "Inter", system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(20px, 4vw, 42px); /* Slightly larger responsive size */
+  line-height: 1.2;
+
+  /* The Outline (Stroke) - Essential since we removed the bg box */
+  text-shadow: 2px 0px 0 #000, -2px 0px 0 #000, 0px 2px 0 #000, 0px -2px 0 #000,
+    1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
+    0px 4px 8px rgba(0, 0, 0, 0.9); /* Heavy drop shadow for contrast */
+}
+
+/* =========================================
+   2. The "Nuclear" Option for Chrome/Edge/Safari
+   This specifically targets the grey box behind the text
+========================================= */
+video::-webkit-media-text-track-display-backdrop {
+  background-color: transparent !important;
+}
+
+video::-webkit-media-text-track-container {
+  background-color: transparent !important;
+}
+
+video::-webkit-media-text-track-background {
+  background-color: transparent !important;
+}

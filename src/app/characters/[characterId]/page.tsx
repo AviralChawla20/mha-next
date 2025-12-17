@@ -1,173 +1,311 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { ChevronLeft, Zap, Activity, Users, Shield } from 'lucide-react';
-import { characterData } from '@/data';
+import React, { useState, useRef, useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { ChevronLeft, Star, Quote, Fingerprint, Calendar, Ruler, Droplet } from 'lucide-react';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faHandFist } from "@fortawesome/free-solid-svg-icons";
+import { characterData } from '@/data'; // Import shared data
 
-export default function CharacterProfile() {
-    const params = useParams();
+export default function TradingCardPage() {
     const router = useRouter();
-    const id = params.characterId as string;
-
-    // Ensure char exists, fallback to first if not found to prevent crashes
-    const char = characterData.find((c: any) => String(c.id) === id) || characterData[0];
-
-    // Helper to extract the color name (e.g., "red" from "text-red-500") for background/glow utilities
-    const colorName = char.color.split('-')[1] || 'slate';
-
+    const params = useParams(); // Get URL params
     const [isHovered, setIsHovered] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
+    const sound = '/sounds/shimmer.mp3';
 
-    const handleMouseEnter = () => {
-        setIsHovered(true);
-        if (audioRef.current) {
+    // --- 1. FIND CHARACTER ---
+    // In a real app, you might fetch this from an API
+    // The "as string" casts the param safely
+    const characterId = params.characterId as string;
+    const character = characterData.find(c => c.id === characterId);
+
+    // --- AUDIO LOGIC ---
+    useEffect(() => {
+        if (isHovered && audioRef.current) {
+            audioRef.current.volume = 1.0;
             audioRef.current.currentTime = 0;
-            audioRef.current.volume = 0.4;
-            audioRef.current.play().catch(e => console.log("Audio play blocked", e));
+            audioRef.current.play().catch((e) => console.log("Audio play failed:", e));
         }
+    }, [isHovered]);
+
+    // --- 404 STATE ---
+    if (!character) {
+        return (
+            <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white">
+                <h1 className="text-4xl font-black mb-4">DATA NOT FOUND</h1>
+                <button onClick={() => router.push('/character')} className="text-cyan-400 underline">Return to Database</button>
+            </div>
+        );
+    }
+
+    // Radar Chart Calculation
+    const calculatePoint = (value: number, index: number, total: number) => {
+        const angle = (Math.PI * 2 * index) / total - Math.PI / 2;
+        const radius = (value / 5) * 45;
+        const x = 50 + radius * Math.cos(angle);
+        const y = 50 + radius * Math.sin(angle);
+        return `${x},${y}`;
     };
 
-    const primaryName = isHovered ? char.heroName : char.name;
-    const secondaryName = isHovered ? char.name : char.heroName;
+    const statsArray = [
+        character.stats.power,
+        character.stats.speed,
+        character.stats.intelligence,
+        character.stats.aura,
+        character.stats.technique
+    ];
+
+    const polygonPoints = statsArray.map((val, i) => calculatePoint(val, i, 5)).join(" ");
+    const fullPoints = [5, 5, 5, 5, 5].map((val, i) => calculatePoint(val, i, 5)).join(" ");
 
     return (
-        <div className="min-h-screen bg-slate-950 text-white font-sans overflow-hidden relative selection:bg-cyan-500 selection:text-black">
+        <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center relative overflow-hidden font-sans">
 
-            <audio ref={audioRef} src={char.sound} preload="auto" />
+            <audio ref={audioRef} src={sound} preload="auto" />
 
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black z-0"></div>
-            <div className="absolute inset-0 bg-[url('/hud.png')] opacity-5 mix-blend-screen pointer-events-none z-0 bg-cover"></div>
+            {/* Background Ambience */}
+            <div className="absolute inset-0 bg-[url('/hud.png')] opacity-20 pointer-events-none bg-cover"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-black via-slate-900/90 to-slate-900/50 pointer-events-none"></div>
 
-            <header className="fixed top-0 left-0 p-6 z-50">
-                <button
-                    onClick={() => router.push('/characters')}
-                    className="flex items-center gap-2 bg-black/50 hover:bg-black/80 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 transition-all text-sm uppercase tracking-widest font-bold text-slate-300 hover:text-white group"
-                >
-                    <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Back to Database
+            {/* Header */}
+            <div className="absolute top-6 left-6 z-50">
+                <button onClick={() => router.push('/character')} className="flex items-center gap-2 text-white/50 hover:text-white transition-colors uppercase font-bold tracking-widest text-xs">
+                    <ChevronLeft size={16} /> Exit Card View
                 </button>
-            </header>
+            </div>
 
-            <main className="relative z-10 flex flex-col lg:flex-row h-screen pt-20 lg:pt-0">
+            {/* --- MAIN LAYOUT CONTAINER --- */}
+            <div className="flex flex-row items-center justify-center gap-20 w-full max-w-[1600px] z-10 p-12 scale-90">
 
-                {/* --- LEFT: DATA COLUMN (Text Aligned Right towards center) --- */}
-                <div className="flex-1 flex flex-col justify-center items-center lg:items-end p-6 lg:pr-20 overflow-y-auto hide-scrollbar z-20">
+                {/* === LEFT PANEL (Description & Details) === */}
+                <div className="w-[500px] text-white space-y-8 animate-in slide-in-from-left-10 duration-700 fade-in">
 
-                    <div className="max-w-xl w-full flex flex-col gap-8 items-center lg:items-end text-center lg:text-right">
+                    {/* 1. Header & Dynamic Name */}
+                    <div className="relative">
+                        <div className="flex items-center gap-3 mb-2 opacity-50">
+                            {/* Dynamic Border Color */}
+                            <div className={`h-[2px] transition-all duration-500 ease-out ${isHovered ? `w-24 bg-current ${character.colors.primary}` : 'bg-white w-12'}`}></div>
+                            <span className="text-xs font-bold tracking-[0.3em] uppercase">
+                                {isHovered ? 'HERO DATA LOG' : 'STUDENT FILE'}
+                            </span>
+                        </div>
 
-                        <div className="space-y-1 animate-[slideDown_0.5s_ease-out]">
-                            <div className="flex items-center justify-center lg:justify-end gap-3 mb-2">
-                                <span className={`px-3 py-1 rounded bg-slate-800 border border-white/10 text-xs font-mono uppercase tracking-wider ${char.color}`}>
-                                    {char.affiliation}
-                                </span>
-                                <span className="text-slate-500 text-xs font-mono uppercase">ID: #{String(char.id).padStart(3, '0')}</span>
-                            </div>
-
-                            <h1 className="font-komyca text-5xl md:text-7xl font-black italic uppercase leading-none tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 transition-all duration-500 min-h-[80px]">
-                                {primaryName}
+                        {/* Name Swap Container */}
+                        <div className="relative h-32">
+                            {/* Civilian Name */}
+                            <h1 className={`text-7xl font-black italic uppercase leading-none tracking-tighter absolute top-0 left-0 transition-all duration-500 origin-bottom-left ${isHovered ? 'opacity-0 translate-y-8 rotate-3 blur-sm' : 'opacity-100 translate-y-0 rotate-0 blur-0'}`}>
+                                {character.student.name.split(" ")[0]}<br />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-500">{character.student.subName}</span>
                             </h1>
 
-                            <h2 className="text-xl md:text-2xl font-bold text-slate-400 tracking-widest uppercase transition-all duration-500">
-                                {secondaryName}
-                            </h2>
+                            {/* Hero Name - Dynamic Color */}
+                            <h1 className={`text-8xl font-black italic uppercase leading-none tracking-tighter ${character.colors.primary} absolute top-0 left-0 transition-all duration-500 origin-bottom-left ${isHovered ? 'opacity-100 translate-y-0 rotate-0 blur-0' : 'opacity-0 -translate-y-8 -rotate-3 blur-sm'}`}>
+                                <span className={`text-white ${character.colors.glow}`}>{character.hero.name}</span>
+                            </h1>
                         </div>
+                    </div>
 
-                        <div className="grid grid-cols-2 gap-4 w-full">
-                            <div className="bg-slate-900/50 p-4 rounded-xl border border-white/5 backdrop-blur-sm">
-                                <div className="flex items-center justify-center lg:justify-end gap-2 text-slate-400 text-xs uppercase mb-1 font-bold">
-                                    <Zap size={14} className={char.color} /> Quirk
-                                </div>
-                                <div className="text-lg font-bold text-white">{char.quirk}</div>
-                            </div>
-                            <div className="bg-slate-900/50 p-4 rounded-xl border border-white/5 backdrop-blur-sm">
-                                <div className="flex items-center justify-center lg:justify-end gap-2 text-slate-400 text-xs uppercase mb-1 font-bold">
-                                    <Activity size={14} className={char.color} /> Blood Type
-                                </div>
-                                <div className="text-lg font-bold text-white">{char.bloodType}</div>
-                            </div>
-                            <div className="bg-slate-900/50 p-4 rounded-xl border border-white/5 backdrop-blur-sm">
-                                <div className="flex items-center justify-center lg:justify-end gap-2 text-slate-400 text-xs uppercase mb-1 font-bold">
-                                    <Shield size={14} className={char.color} /> Height
-                                </div>
-                                <div className="text-lg font-bold text-white">{char.height}</div>
-                            </div>
-                            <div className="bg-slate-900/50 p-4 rounded-xl border border-white/5 backdrop-blur-sm">
-                                <div className="flex items-center justify-center lg:justify-end gap-2 text-slate-400 text-xs uppercase mb-1 font-bold">
-                                    <Users size={14} className={char.color} /> Birthday
-                                </div>
-                                <div className="text-lg font-bold text-white">{char.birthday}</div>
-                            </div>
-                        </div>
+                    {/* 2. DYNAMIC QUOTE */}
+                    <div className={`relative pl-6 py-4 border-l-4 transition-all duration-500 ${isHovered ? `${character.colors.border} ${character.colors.bgSoft}` : 'border-slate-600'}`}>
+                        <Quote size={24} className={`absolute -top-3 -left-3 bg-slate-950 p-1 transition-colors duration-500 ${isHovered ? character.colors.primary : 'text-slate-600'}`} />
 
-                        <div className="w-full bg-slate-900/80 p-6 rounded-2xl border-l-0 lg:border-r-4 border-slate-700 relative text-left lg:text-right">
-                            <p className="text-slate-300 leading-relaxed font-medium relative z-10">
-                                {char.description}
+                        <div className="relative min-h-[4rem]">
+                            {/* Student Quote */}
+                            <p className={`text-2xl italic font-serif text-white/90 leading-relaxed absolute top-0 left-0 transition-all duration-500 ${isHovered ? 'opacity-0 translate-x-4' : 'opacity-100 translate-x-0'}`}>
+                                "{character.student.quote}"
+                            </p>
+                            {/* Hero Quote - Dynamic Color */}
+                            <p className={`text-2xl italic font-serif ${character.colors.secondary} leading-relaxed absolute top-0 left-0 transition-all duration-500 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'}`}>
+                                "{character.hero.quote}"
                             </p>
                         </div>
+                    </div>
 
-                        <div className="space-y-3 w-full">
-                            {Object.entries(char.stats).map(([key, val]) => (
-                                <div key={key} className="flex items-center gap-4 text-xs font-mono uppercase justify-end">
-                                    <span className="w-24 text-slate-400 text-right">{key}</span>
-                                    <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden flex justify-end">
-                                        <div
-                                            className={`h-full ${char.color.replace('text-', 'bg-')}`}
-                                            style={{
-                                                width: val === 'S' ? '100%' : val === 'A' ? '85%' : val === 'B' ? '70%' : val === 'C' ? '50%' : '30%'
-                                            }}
-                                        ></div>
-                                    </div>
-                                    <span className="w-6 font-bold text-white text-left">{val as string}</span>
+                    {/* 3. DYNAMIC DESCRIPTION */}
+                    <div className="relative min-h-[5rem]">
+                        <p className={`text-slate-400 leading-relaxed text-xl absolute top-0 left-0 transition-all duration-500 ${isHovered ? 'opacity-0' : 'opacity-100'}`}>
+                            {character.student.description}
+                        </p>
+                        <p className={`${character.colors.secondary} opacity-00 leading-relaxed text-xl absolute top-0 left-0 transition-all duration-500 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+                            {character.hero.description}
+                        </p>
+                    </div>
+
+                    {/* 4. Personal Stats Grid */}
+                    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
+                        {/* Stat Block Component */}
+                        <div className="flex items-center gap-3 group/stat">
+                            <div className={`p-2 rounded transition-colors duration-300 ${isHovered ? `${character.colors.bgSoft} ${character.colors.primary}` : 'bg-slate-800 text-slate-400'}`}>
+                                <Fingerprint size={18} />
+                            </div>
+                            <div>
+                                <p className="text-[20px] uppercase tracking-widest text-slate-500">Age</p>
+                                <p className="font-bold font-mono text-2xl">{character.bio.age}</p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 group/stat">
+                            <div className={`p-2 rounded transition-colors duration-300 ${isHovered ? `${character.colors.bgSoft} ${character.colors.primary}` : 'bg-slate-800 text-slate-400'}`}>
+                                <Calendar size={18} />
+                            </div>
+                            <div>
+                                <p className="text-[20px] uppercase tracking-widest text-slate-500">Birthday</p>
+                                <p className="font-bold font-mono text-2xl">{character.bio.birthday}</p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 group/stat">
+                            <div className={`p-2 rounded transition-colors duration-300 ${isHovered ? `${character.colors.bgSoft} ${character.colors.primary}` : 'bg-slate-800 text-slate-400'}`}>
+                                <Ruler size={18} />
+                            </div>
+                            <div>
+                                <p className="text-[20px] uppercase tracking-widest text-slate-500">Height</p>
+                                <p className="font-bold font-mono text-2xl">{character.bio.height}</p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 group/stat">
+                            <div className={`p-2 rounded transition-colors duration-300 ${isHovered ? `${character.colors.bgSoft} ${character.colors.primary}` : 'bg-slate-800 text-slate-400'}`}>
+                                <Droplet size={18} />
+                            </div>
+                            <div>
+                                <p className="text-[20px] uppercase tracking-widest text-slate-500">Blood Type</p>
+                                <p className="font-bold font-mono text-2xl">{character.bio.bloodType}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                {/* === RIGHT PANEL (Trading Card) === */}
+                <div
+                    className="relative w-[600px] h-[900px] rounded-[2rem] transition-all duration-500 transform hover:scale-[1.02] hover:rotate-1 perspective-container group cursor-pointer"
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                >
+                    {/* 1. CARD BORDER & FRAME - Dynamic Border & BG */}
+                    <div className={`absolute inset-0 rounded-[2rem] border-[12px] ${character.colors.border} ${character.colors.bg} overflow-hidden shadow-2xl z-0`}>
+
+                        {/* Background Burst Lines */}
+                        <div className="absolute inset-0 bg-white opacity-5 z-0">
+                            <div className="absolute inset-0 bg-[conic-gradient(from_0deg,transparent_0_deg,white_10deg,transparent_20deg)] animate-[spin_20s_linear_infinite] opacity-20 scale-150"></div>
+                        </div>
+
+                        {/* --- 2. CHARACTER IMAGE LAYER (z-10) --- */}
+                        <div className="absolute inset-4 bottom-28 z-10 flex items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-b from-slate-800 to-slate-900 border border-white/10">
+                            {/* NOTE: You should use Next.js <Image> in production for optimization */}
+                            <img
+                                src={character.images.civilian}
+                                alt="Civilian"
+                                className={`absolute w-full h-full object-cover object-top top-10 transition-all duration-500 ${isHovered ? 'opacity-0 scale-110' : 'opacity-100 scale-80'}`}
+                            />
+                            <img
+                                src={character.images.hero}
+                                alt="Hero"
+                                className={`absolute w-full h-full object-cover object-top transition-all duration-500 
+  ${character.student.name.includes("SHOTO") ? 'top-40' : 'top-10'} 
+  ${isHovered ? 'opacity-100 scale-105' : 'opacity-0 scale-100'}
+`}
+
+                            />
+                        </div>
+
+                        {/* --- 3. UI OVERLAYS --- */}
+                        <div className="absolute top-10 left-10 z-30">
+                            <div className="w-24 h-24 bg-slate-200 text-slate-900 clip-hexagon flex items-center justify-center border-[5px] border-slate-900 shadow-lg">
+                                {/* You could change this icon dynamically too based on type */}
+                                <FontAwesomeIcon icon={faHandFist} size="4x" />
+                            </div>
+                        </div>
+
+                        <div className="absolute top-8 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center">
+                            <div className="flex gap-2 mb-2">
+                                {[1, 2, 3, 4, 5].map(i => <Star key={i} size={20} className="fill-yellow-400 text-yellow-400 stroke-[3px] paint-order-stroke" />)}
+                            </div>
+                            <div className="bg-slate-900 text-white text-sm font-black px-6 py-1.5 rounded-full border border-white/20 uppercase tracking-widest">
+                                Type: {character.type}
+                            </div>
+                        </div>
+
+                        {/* Dynamic Name Banner (Card Version) */}
+                        <div className="absolute top-16 rotate-[-10deg] right-0 z-11 flex flex-col items-end pointer-events-none">
+                            <div className="bg-white skew-x-[-12deg] mr-[-20px] pl-20 pr-14 py-4 border-b-[8px] border-l-[8px] border-slate-900 shadow-lg relative z-10 min-w-[100px] flex justify-end">
+                                <div className="relative text-right -z-10">
+                                    <h1 className={`text-7xl font-black -z-10 italic uppercase text-slate-900 leading-[0.85] tracking-tighter transition-all duration-300 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 hidden'}`}>
+                                        {character.hero.name}
+                                    </h1>
+                                    <h1 className={`text-6xl font-black italic uppercase text-slate-900 leading-[0.85] tracking-tighter transition-all duration-300 ${!isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 hidden'}`}>
+                                        {character.student.subName}
+                                    </h1>
                                 </div>
-                            ))}
+                            </div>
+                            <div className="mt-[-5px] mr-10 bg-slate-900 border-2 border-white/20 skew-x-[-12deg] px-8 py-1.5 shadow-md relative z-0">
+                                <span className="block text-white font-mono text-base font-bold tracking-widest">
+                                    {character.id} <span className="text-yellow-400 ml-2">{character.rarity}</span>
+                                </span>
+                            </div>
                         </div>
+
+                        {/* --- 4. BOTTOM SECTION --- */}
+                        <div className="absolute bottom-10 left-0 z-30 w-2/3 pointer-events-none rotate-[-10deg]">
+                            <div className="bg-slate-900/95 border-t-[4px] border-r-[4px] border-white/20 skew-x-[-12deg] ml-[-20px] pl-16 pr-12 py-8 shadow-xl">
+                                <div>
+                                    <div className="flex items-center gap-3 mb-1 ">
+                                        <span className=" text-yellow-400 font-black text-xl italic tracking-widest">QUIRK</span>
+                                        <div className="h-1.5 w-16 bg-white/20 rounded-full"></div>
+                                    </div>
+                                    <h2 className="text-5xl font-black text-white uppercase italic leading-none drop-shadow-md">
+                                        {character.quirk}
+                                    </h2>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Radar Chart */}
+                        <div className="absolute bottom-10 right-10 z-30 w-40 h-40">
+                            <div className="relative w-full h-full bg-slate-900/95 rounded-full border-4 border-white/20 shadow-xl">
+                                <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible">
+                                    <polygon points={fullPoints} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+                                    <polygon points={fullPoints} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1" transform="scale(0.8) translate(10,10)" />
+                                    <polygon points={fullPoints} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1" transform="scale(0.6) translate(20,20)" />
+
+                                    <line x1="50" y1="50" x2="50" y2="5" stroke="rgba(255,255,255,0.2)" strokeWidth="0.5" />
+                                    <line x1="50" y1="50" x2="93" y2="36" stroke="rgba(255,255,255,0.2)" strokeWidth="0.5" />
+                                    <line x1="50" y1="50" x2="79" y2="90" stroke="rgba(255,255,255,0.2)" strokeWidth="0.5" />
+                                    <line x1="50" y1="50" x2="21" y2="90" stroke="rgba(255,255,255,0.2)" strokeWidth="0.5" />
+                                    <line x1="50" y1="50" x2="7" y2="36" stroke="rgba(255,255,255,0.2)" strokeWidth="0.5" />
+
+                                    {/* DYNAMIC CHART COLORS */}
+                                    <polygon
+                                        points={polygonPoints}
+                                        fill={character.colors.chartFill}
+                                        stroke={character.colors.chartStroke}
+                                        strokeWidth="2"
+                                        className={`drop-shadow-[0_0_10px_${character.colors.chartStroke}]`}
+                                    />
+                                    {statsArray.map((val, i) => {
+                                        const [cx, cy] = calculatePoint(val, i, 5).split(',');
+                                        return <circle key={i} cx={cx} cy={cy} r="2" fill="white" />;
+                                    })}
+                                </svg>
+
+                                <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-[9px] font-black bg-black text-white px-1.5 rounded">PWR</span>
+                                <span className="absolute top-[25%] -right-4 text-[9px] font-black bg-black text-white px-1.5 rounded">SPD</span>
+                                <span className="absolute bottom-[10%] -right-2 text-[9px] font-black bg-black text-white px-1.5 rounded">INT</span>
+                                <span className="absolute bottom-[10%] -left-2 text-[9px] font-black bg-black text-white px-1.5 rounded">AUR</span>
+                                <span className="absolute top-[25%] -left-4 text-[9px] font-black bg-black text-white px-1.5 rounded">TCH</span>
+                            </div>
+                        </div>
+
                     </div>
 
+                    {/* 5. FOIL OVERLAY */}
+                    <div className="absolute inset-0 z-40 rounded-[2rem] pointer-events-none bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 mix-blend-overlay"></div>
+                    <div className="absolute inset-0 z-40 rounded-[2rem] pointer-events-none bg-[linear-gradient(115deg,transparent_40%,rgba(255,255,255,0.4)_45%,rgba(255,255,255,0.0)_50%)] bg-[length:250%_250%] opacity-0 group-hover:opacity-50 animate-[shimmer_3s_infinite] mix-blend-color-dodge"></div>
                 </div>
 
-                {/* --- RIGHT: INTERACTIVE CHARACTER DISPLAY (Aligned Left towards center) --- */}
-                <div className="lg:w-1/2 h-1/2 lg:h-full relative flex items-center justify-center lg:justify-start lg:pl-10 overflow-hidden">
-
-                    <div
-                        className="relative w-full h-full cursor-pointer group outline-none flex items-center justify-center lg:justify-start z-30"
-                        onMouseEnter={handleMouseEnter}
-                        onMouseLeave={() => setIsHovered(false)}
-                    >
-                        {/* Subtle floor gradient */}
-                        <div className={`absolute inset-0 bg-gradient-to-t from-${colorName}-500/10 to-transparent transition-opacity duration-500 ${isHovered ? 'opacity-100' : 'opacity-0'}`}></div>
-
-                        {/* --- STATE 1: CIVILIAN --- */}
-                        <div className={`absolute inset-0 flex items-center justify-center lg:justify-start transition-all duration-700 ease-in-out
-                            ${isHovered ? 'opacity-0 scale-95 blur-sm' : 'opacity-100 scale-100 blur-0'}
-                        `}>
-                            {/* REMOVED: animate-[pulse_3s_infinite_ease-in-out] */}
-                            <img
-                                src={char.civilianImage}
-                                alt="Civilian Form"
-                                className="h-[75%] w-auto object-contain drop-shadow-2xl transition-transform duration-700"
-                            />
-                        </div>
-
-                        {/* --- STATE 2: HERO --- */}
-                        <div className={`absolute inset-0 flex items-center justify-center lg:justify-start transition-all duration-300 ease-out
-                            ${isHovered ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-110 translate-y-10'}
-                        `}>
-                            {/* ADDED: Dynamic Aura Effect Behind Hero */}
-                            <div className={`absolute top-1/2 left-1/2 lg:left-1/3 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[70%] bg-${colorName}-500/30 rounded-full blur-[100px] mix-blend-screen pointer-events-none transition-all duration-1000
-                                ${isHovered ? 'opacity-100 animate-pulse scale-100' : 'opacity-0 scale-50'}`}
-                            ></div>
-
-                            <img
-                                src={char.heroImage}
-                                alt="Hero Form"
-                                className="h-[80%] w-auto object-contain filter drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] relative z-10"
-                            />
-                        </div>
-
-                    </div>
-                </div>
-
-            </main>
+            </div>
         </div>
     );
 }

@@ -243,23 +243,36 @@ export default function Home() {
       </div>
 
       {/* --- IZUKU PEEKING COMPONENT (UPDATED) --- */}
-      <div
-        onClick={() => router.push('/characters')}
-        className="fixed -bottom-12 -right-12 z-50 group cursor-pointer"
-      >
-        {/* Comic Chat Bubble Image */}
-        <div className="absolute bottom-full right-[45%] mb-[-5px] transform scale-0 group-hover:scale-100 transition-transform duration-300 origin-bottom-right drop-shadow-lg">
-          <img src="/comic-bubble.png" alt="Psstt.." className="w-32 h-auto" />
-          <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[65%] text-black font-black italic text-base">Psstt..</span>
-        </div>
+      <div className="fixed bottom-0 right-0 z-50 overflow-hidden pointer-events-none">
+        <div
+          onClick={() => router.push('/characters')}
+          className="relative translate-x-16 translate-y-16 group cursor-pointer pointer-events-auto"
+        >
+          {/* Bubble */}
+          <div className="absolute bottom-full translate-x-(-40) right-[45%] mb-[-5px] transform scale-0 group-hover:scale-100 transition-transform duration-300 origin-bottom-right drop-shadow-lg">
+            <img src="/comic-bubble.png" alt="Psstt.." className="w-32 h-auto" />
+            <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[65%] text-black font-black italic text-base">
+              Psstt..
+            </span>
+          </div>
 
-        {/* Izuku Image (Smaller & Hidden) */}
-        <img
-          src="/izuku-peek.webp"
-          alt="Izuku"
-          className="w-24 md:w-32 h-auto object-contain transform translate-y-12 translate-x-8 rotate-[-20deg] group-hover:translate-y-4 group-hover:translate-x-4 group-hover:rotate-[-20deg] transition-all duration-500 ease-out drop-shadow-2xl"
-        />
+          {/* Deku */}
+          <img
+            src="/izuku-peek.webp"
+            alt="Izuku"
+            className="
+        w-24 md:w-32 h-auto object-contain 
+        transform transition-all duration-500 ease-out drop-shadow-2xl
+
+        rotate-[-20deg]  /* default tilt */
+
+        group-hover:translate-x-4 group-hover:translate-y-4 
+        group-hover:rotate-[-20deg] /* keeps tilt while moving */
+      "
+          />
+        </div>
       </div>
+
 
       {/* Footer System Status */}
       <div className="relative z-20 pb-4 text-slate-600 text-[10px] font-mono text-center uppercase tracking-[0.3em] opacity-50">

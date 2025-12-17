@@ -2,28 +2,21 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link'; // <--- Import Link
-import { Search, ChevronLeft, Zap, Shield, User } from 'lucide-react';
-
-// Mock Character Data (You can replace this with a real DB fetch or extensive data file later)
-const initialCharacters = [
-    { id: 1, name: 'Izuku Midoriya', heroName: 'Deku', quirk: 'One For All', affiliation: 'U.A. High', image: 'https://i.ibb.co/kVfwwv7p/Izuku-Midoriya.png' },
-    { id: 2, name: 'Katsuki Bakugo', heroName: 'Great Explosion Murder God Dynamight', quirk: 'Explosion', affiliation: 'U.A. High', image: 'https://i.ibb.co/0yXq2gq/Bakugo.png' },
-    { id: 3, name: 'Shoto Todoroki', heroName: 'Shoto', quirk: 'Half-Cold Half-Hot', affiliation: 'U.A. High', image: 'https://i.ibb.co/5Gz1X1d/Todoroki.png' },
-    { id: 4, name: 'Ochaco Uraraka', heroName: 'Uravity', quirk: 'Zero Gravity', affiliation: 'U.A. High', image: 'https://i.ibb.co/7jXq2gq/Uraraka.png' },
-    { id: 5, name: 'Toshinori Yagi', heroName: 'All Might', quirk: 'One For All', affiliation: 'Pro Hero (Retired)', image: 'https://i.ibb.co/Y4mSbpt6/Adobe-Express-file.png' },
-];
+import Link from 'next/link';
+import { Search, ChevronLeft, Zap, Shield } from 'lucide-react';
+// IMPORT THE SHARED DATA
+import { characterData } from '@/data';
 
 export default function CharactersPage() {
     const router = useRouter();
     const [searchTerm, setSearchTerm] = useState('');
-    const [characters, setCharacters] = useState(initialCharacters);
+    const [characters, setCharacters] = useState(characterData);
 
     // Filter logic
     useEffect(() => {
-        const filtered = initialCharacters.filter(char =>
-            char.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            char.heroName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        const filtered = characterData.filter(char =>
+            char.student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            char.hero.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             char.quirk.toLowerCase().includes(searchTerm.toLowerCase())
         );
         setCharacters(filtered);
@@ -67,25 +60,22 @@ export default function CharactersPage() {
                 {/* Character Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-20">
                     {characters.map((char) => (
-                        // WRAPPER LINK
+                        // DYNAMIC LINK: Links to /character/01-001, etc.
                         <Link key={char.id} href={`/characters/${char.id}`} className="block group">
-                            <div className="group relative bg-slate-900 border border-white/10 rounded-2xl overflow-hidden hover:border-cyan-400/50 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_0_30px_rgba(34,211,238,0.15)] h-full flex flex-col">
+                            <div className={`group relative bg-slate-900 border border-white/10 rounded-2xl overflow-hidden hover:${char.colors.border} transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_0_30px_rgba(34,211,238,0.15)] h-full flex flex-col`}>
 
                                 {/* Image Area */}
                                 <div className="h-64 w-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-800 to-slate-950 relative overflow-hidden flex items-end justify-center">
                                     <div className="absolute inset-0 bg-tech-grid opacity-20"></div>
                                     <img
-                                        src={char.image}
-                                        alt={char.name}
+                                        src={char.images.hero}
+                                        alt={char.hero.name}
                                         className="h-[110%] w-auto object-contain transition-transform duration-500 group-hover:scale-110 drop-shadow-2xl"
-                                        onError={(e) => {
-                                            e.currentTarget.style.display = 'none';
-                                        }}
                                     />
                                     {/* Name Overlay */}
                                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-slate-950 to-transparent p-6 pt-20">
-                                        <h2 className="text-2xl font-black italic uppercase text-white leading-none">{char.heroName}</h2>
-                                        <p className="text-cyan-400 font-bold text-sm tracking-wide">{char.name}</p>
+                                        <h2 className="text-2xl font-black italic uppercase text-white leading-none">{char.hero.name}</h2>
+                                        <p className={`${char.colors.primary} font-bold text-sm tracking-wide`}>{char.student.name}</p>
                                     </div>
                                 </div>
 
@@ -96,13 +86,13 @@ export default function CharactersPage() {
                                         <span className="font-bold text-white text-right">{char.quirk}</span>
                                     </div>
                                     <div className="flex items-center justify-between text-sm">
-                                        <span className="flex items-center gap-2 text-slate-400"><Shield size={16} className="text-emerald-400" /> Affiliation</span>
-                                        <span className="font-bold text-white text-right">{char.affiliation}</span>
+                                        <span className="flex items-center gap-2 text-slate-400"><Shield size={16} className={char.colors.primary} /> Type</span>
+                                        <span className="font-bold text-white text-right">{char.type}</span>
                                     </div>
 
                                     {/* Decorative Bar */}
                                     <div className="w-full h-1 bg-slate-800 rounded-full mt-4 overflow-hidden">
-                                        <div className="h-full bg-cyan-500 w-[60%] group-hover:w-full transition-all duration-700"></div>
+                                        <div className={`h-full ${char.colors.bg.replace('bg-', 'bg-')} w-[60%] group-hover:w-full transition-all duration-700 bg-current ${char.colors.primary}`}></div>
                                     </div>
                                 </div>
 
@@ -110,14 +100,6 @@ export default function CharactersPage() {
                         </Link>
                     ))}
                 </div>
-
-                {characters.length === 0 && (
-                    <div className="text-center py-20 text-slate-500 font-mono">
-                        <p className="text-xl">NO RECORDS FOUND</p>
-                        <p className="text-sm">Adjust search parameters</p>
-                    </div>
-                )}
-
             </div>
         </div>
     );
