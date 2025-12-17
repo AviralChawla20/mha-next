@@ -5,11 +5,12 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const fileId = searchParams.get('fileId');
 
+  console.log(`[STREAM] Request for fileId: ${fileId}`);
+
   if (!fileId) {
     return new NextResponse('Missing File ID', { status: 400 });
   }
 
-  // 1. Load credentials from Environment
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
   const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
@@ -20,36 +21,31 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // 2. Setup OAuth2 Client
     const oauth2Client = new google.auth.OAuth2(
       clientId,
       clientSecret,
-      "https://developers.google.com/oauthplayground" // Redirect URL (must match what you used to generate the token)
+      "https://developers.google.com/oauthplayground"
     );
 
     oauth2Client.setCredentials({ refresh_token: refreshToken });
 
-    // 3. Get a fresh Access Token
-    // This handles token expiration automatically!
     const { token } = await oauth2Client.getAccessToken();
 
     if (!token) {
       throw new Error("Failed to generate access token");
     }
 
-    // 4. Prepare Headers for Google Drive
-    // We forward the 'Range' header from the browser (video player) to Google
-    // This enables seeking/scrubbing in the video.
     const driveHeaders: Record<string, string> = {
       Authorization: `Bearer ${token}`,
     };
 
     const range = request.headers.get('range');
+    console.log(`[STREAM] Range header: ${range || 'none'}`);
+    
     if (range) {
       driveHeaders['Range'] = range;
     }
 
-    // 5. Fetch the video stream from Google Drive API
     const driveResponse = await fetch(
       `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
       {
@@ -57,28 +53,47 @@ export async function GET(request: NextRequest) {
       }
     );
 
+    console.log(`[STREAM] Drive response status: ${driveResponse.status}`);
+    console.log(`[STREAM] Content-Type: ${driveResponse.headers.get('Content-Type')}`);
+    console.log(`[STREAM] Content-Length: ${driveResponse.headers.get('Content-Length')}`);
+    console.log(`[STREAM] Accept-Ranges: ${driveResponse.headers.get('Accept-Ranges')}`);
+
+    console.log(`[STREAM] All Drive Headers:`);
+driveResponse.headers.forEach((value, key) => {
+  console.log(`  ${key}: ${value}`);
+});
+
     if (!driveResponse.ok) {
         const errorText = await driveResponse.text();
         console.error(`Google Drive API Error (${driveResponse.status}):`, errorText);
         return new NextResponse(`Google Drive Error: ${driveResponse.statusText}`, { status: driveResponse.status });
     }
 
-    // 6. Stream it back to the client
-    // We pass along the Content-Type, Content-Length, and Content-Range headers
-    // so the browser knows it's a video file.
     const responseHeaders = new Headers();
-    if (driveResponse.headers.get('Content-Type')) {
-      responseHeaders.set('Content-Type', driveResponse.headers.get('Content-Type')!);
+    
+    const contentType = driveResponse.headers.get('Content-Type');
+    const contentLength = driveResponse.headers.get('Content-Length');
+    const contentRange = driveResponse.headers.get('Content-Range');
+    const acceptRanges = driveResponse.headers.get('Accept-Ranges');
+    
+    if (contentType) {
+      responseHeaders.set('Content-Type', contentType);
     }
-    if (driveResponse.headers.get('Content-Length')) {
-      responseHeaders.set('Content-Length', driveResponse.headers.get('Content-Length')!);
+    if (contentLength) {
+      responseHeaders.set('Content-Length', contentLength);
     }
-    if (driveResponse.headers.get('Content-Range')) {
-      responseHeaders.set('Content-Range', driveResponse.headers.get('Content-Range')!);
+    if (contentRange) {
+      responseHeaders.set('Content-Range', contentRange);
     }
-    if (driveResponse.headers.get('Accept-Ranges')) {
-      responseHeaders.set('Accept-Ranges', driveResponse.headers.get('Accept-Ranges')!);
-    }
+    
+    // CRITICAL: Always set Accept-Ranges for video streaming
+    responseHeaders.set('Accept-Ranges', acceptRanges || 'bytes');
+    
+    // Add CORS headers (in case that's an issue)
+    responseHeaders.set('Access-Control-Allow-Origin', '*');
+    responseHeaders.set('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+    
+    console.log(`[STREAM] Streaming back to client with status ${driveResponse.status}`);
 
     return new NextResponse(driveResponse.body, {
       status: driveResponse.status,
@@ -87,10 +102,9 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Stream Error:', error.message);
-    // Log detailed Google API error if available
+    console.error('[STREAM] Error:', error.message);
     if (error.response && error.response.data) {
-        console.error('Google API Error Details:', JSON.stringify(error.response.data, null, 2));
+        console.error('[STREAM] Google API Error Details:', JSON.stringify(error.response.data, null, 2));
     }
     return new NextResponse('Internal Server Error', { status: 500 });
   }
