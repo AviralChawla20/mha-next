@@ -249,3 +249,18 @@ video::-webkit-media-text-track-container {
 video::-webkit-media-text-track-background {
   background-color: transparent !important;
 }
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.5s ease-out forwards;
+}

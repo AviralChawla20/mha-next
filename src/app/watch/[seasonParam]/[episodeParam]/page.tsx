@@ -353,6 +353,49 @@ export default function WatchPage() {
                                 }}
                             />
 
+                            {/* Next Episode Popup */}
+                            {(() => {
+                                const nextIndex = currentEpisodeIndex + 1;
+                                const hasNextEp = nextIndex < animeData.length;
+                                const timeLeft = duration - currentTime;
+                                const showPopup = hasNextEp && timeLeft <= 30 && timeLeft > 0 && !videoError;
+
+                                if (showPopup) {
+                                    const nextEp = animeData[nextIndex] as AnimeEpisode;
+                                    return (
+                                        <div
+                                            className="absolute bottom-24 right-4 z-50 bg-slate-900/90 border border-white/10 p-6 rounded-xl shadow-2xl backdrop-blur-md max-w-sm animate-slide-in-right cursor-pointer hover:bg-slate-800/90 transition-colors group/popup"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleNavigate('next');
+                                            }}
+                                        >
+                                            <div className="flex items-start gap-4">
+                                                <div className="flex-1">
+                                                    <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Up Next</p>
+                                                    <p className="text-white font-bold text-lg line-clamp-2 leading-tight group-hover/popup:text-yellow-400 transition-colors">
+                                                        {nextEp.title}
+                                                    </p>
+                                                    <p className="text-slate-500 text-sm mt-1">
+                                                        {nextEp.season} - Episode {nextEp.episodeNumber}
+                                                    </p>
+                                                </div>
+                                                <div className="mt-1">
+                                                    <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center group-hover/popup:bg-yellow-400 group-hover/popup:text-black transition-all">
+                                                        <SkipForward size={24} />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="absolute top-2 right-2">
+                                                {/* Optional: Close button could go here if needed, but clicking outside or waiting is fine for now */}
+                                            </div>
+                                            {/* Progress bar for auto-play could go here */}
+                                        </div>
+                                    );
+                                }
+                                return null;
+                            })()}
+
                             <div className={`absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent flex flex-col justify-end p-4 transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0'} ${videoError ? 'hidden' : ''}`}>
 
                                 <div className="flex items-center gap-4 mb-4">
