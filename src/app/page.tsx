@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
-import { Tv, BookOpen, Library, Star, Zap, Shield, Database, Activity, Wifi, Crosshair, Cpu } from 'lucide-react';
+import { Tv, BookOpen, Library, Star, Zap, Shield, Database, Activity, Wifi, Crosshair, Cpu, Monitor, Smartphone } from 'lucide-react';
 import AuthButton from '@/components/AuthButton';
 import { libraryData, animeData, mangaData } from '@/data';
 
@@ -19,59 +19,88 @@ export default function Home() {
   const [animeStats, setAnimeStats] = useState({ watched: 0, total: 0, percentage: 0 });
   const [mangaStats, setMangaStats] = useState({ read: 0, total: 0, percentage: 0 });
 
+  // TV Login State
+  const [showTvLogin, setShowTvLogin] = useState(false);
+  const [tvCode, setTvCode] = useState<string | null>(null);
+
   // Current Time for the HUD
   const [time, setTime] = useState<string>("");
 
   useEffect(() => {
+    // 1. Timer
     const timer = setInterval(() => {
       const now = new Date();
       setTime(now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }));
     }, 1000);
 
+    // 2. Check User & Stats
     const checkUserAndStats = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
 
       if (user) {
-        // --- 1. Fetch Library Stats ---
+        // --- Fetch Library Stats ---
         const { count: libCount } = await supabase.from('user_library').select('*', { count: 'exact', head: true });
         const libOwned = libCount || 0;
         const libTotal = libraryData.length;
-        const libPercentage = libTotal > 0 ? Math.round((libOwned / libTotal) * 100) : 0;
-        setLibraryStats({ owned: libOwned, total: libTotal, percentage: libPercentage });
+        setLibraryStats({ owned: libOwned, total: libTotal, percentage: libTotal > 0 ? Math.round((libOwned / libTotal) * 100) : 0 });
 
-        // --- 2. Fetch Anime Stats ---
-        const { count: animeCount } = await supabase
-          .from('user_anime')
-          .select('*', { count: 'exact', head: true })
-          .eq('is_watched', true);
-
+        // --- Fetch Anime Stats ---
+        const { count: animeCount } = await supabase.from('user_anime').select('*', { count: 'exact', head: true }).eq('is_watched', true);
         const watched = animeCount || 0;
         const animeTotal = animeData.filter((i: any) => i.type === 'episode' || i.type === 'movie').length;
-        const animePercentage = animeTotal > 0 ? Math.round((watched / animeTotal) * 100) : 0;
-        setAnimeStats({ watched, total: animeTotal, percentage: animePercentage });
+        setAnimeStats({ watched, total: animeTotal, percentage: animeTotal > 0 ? Math.round((watched / animeTotal) * 100) : 0 });
 
-        // --- 3. Fetch Manga Stats ---
-        const { count: mangaCount } = await supabase
-          .from('user_manga')
-          .select('*', { count: 'exact', head: true })
-          .eq('is_read', true);
-
+        // --- Fetch Manga Stats ---
+        const { count: mangaCount } = await supabase.from('user_manga').select('*', { count: 'exact', head: true }).eq('is_read', true);
         const read = mangaCount || 0;
         const mangaTotal = mangaData.length;
-        const mangaPercentage = mangaTotal > 0 ? Math.round((read / mangaTotal) * 100) : 0;
-        setMangaStats({ read, total: mangaTotal, percentage: mangaPercentage });
+        setMangaStats({ read, total: mangaTotal, percentage: mangaTotal > 0 ? Math.round((read / mangaTotal) * 100) : 0 });
       }
       setLoading(false);
     };
 
     checkUserAndStats();
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => setUser(session?.user ?? null));
     return () => {
       subscription.unsubscribe();
       clearInterval(timer);
     };
   }, [supabase]);
+
+  // --- TV LOGIN LOGIC ---
+  const generateTvCode = async () => {
+    // Generate a random 6-character code (A-Z, 0-9)
+    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+    setTvCode(code);
+
+    // Insert into DB
+    await supabase.from('tv_codes').insert({ code });
+
+    // Listen for updates to this specific code
+    const channel = supabase.channel(`tv_login_${code}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'tv_codes', filter: `code=eq.${code}` },
+        async (payload) => {
+          if (payload.new.refresh_token) {
+            // WE GOT THE TOKEN! Login the TV.
+            const { error } = await supabase.auth.setSession({
+              refresh_token: payload.new.refresh_token,
+              access_token: payload.new.refresh_token // Supabase will auto-refresh if valid
+            });
+
+            if (!error) {
+              window.location.reload(); // Refresh to load the dashboard
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => supabase.removeChannel(channel);
+  };
 
   // --- RANK LOGIC ---
   const getRank = (pct: number) => {
@@ -104,13 +133,62 @@ export default function Home() {
     return (
       <div className="min-h-screen w-full bg-slate-950 flex flex-col items-center justify-center relative overflow-hidden font-sans text-white">
         <div className="absolute inset-0 bg-tech-grid opacity-20"></div>
+
+        {/* TV Login Modal / Overlay */}
+        {showTvLogin && (
+          <div className="absolute inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 animate-in fade-in zoom-in duration-300">
+            <div className="w-full max-w-md bg-slate-900 border border-cyan-500/50 p-8 rounded-2xl relative shadow-[0_0_50px_rgba(6,182,212,0.2)]">
+              <button onClick={() => setShowTvLogin(false)} className="absolute top-4 right-4 text-slate-500 hover:text-white font-mono">X_CLOSE</button>
+
+              <h2 className="text-2xl font-black italic uppercase text-cyan-400 mb-6 flex items-center gap-2">
+                <Monitor className="animate-pulse" /> DEVICE_LINK
+              </h2>
+
+              <div className="text-center space-y-6">
+                <p className="text-slate-400 text-sm">
+                  On your phone or computer, go to:
+                  <br />
+                  <span className="text-white font-mono bg-slate-800 px-2 py-1 rounded mt-2 block">myheroarchive.vercel.app/activate</span>
+                </p>
+
+                <div className="py-6">
+                  <p className="text-xs text-slate-500 uppercase tracking-widest mb-2">ENTER CODE</p>
+                  {tvCode ? (
+                    <div className="text-5xl md:text-6xl font-black tracking-widest text-yellow-400 font-mono shadow-cyan-500/50 drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]">
+                      {tvCode}
+                    </div>
+                  ) : (
+                    <div className="text-cyan-500/50 animate-pulse text-sm font-mono">GENERATING UPLINK...</div>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-center gap-2 text-xs text-slate-500 font-mono">
+                  <Activity size={12} className="animate-spin" /> WAITING FOR SIGNAL...
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="relative z-10 flex flex-col items-center text-center p-6 animate-[fadeIn_1s_ease-out]">
           <div className="w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(250,204,21,0.4)]">
             <span className="text-slate-900 font-black text-3xl">UA</span>
           </div>
           <h1 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter mb-4">Welcome Hero</h1>
           <p className="text-slate-400 text-lg max-w-md mb-8">Access the ultimate archive of My Hero Academia. Sign in to track your progress.</p>
-          <div className="scale-125"><AuthButton allowSignIn={true} /></div>
+
+          <div className="scale-125 mb-8"><AuthButton allowSignIn={true} /></div>
+
+          {/* New TV Login Button */}
+          <button
+            onClick={() => {
+              setShowTvLogin(true);
+              generateTvCode();
+            }}
+            className="flex items-center gap-2 text-cyan-500 hover:text-cyan-400 font-mono text-sm tracking-widest border border-cyan-500/30 hover:border-cyan-500 px-4 py-2 rounded-full transition-all hover:bg-cyan-500/10"
+          >
+            <Monitor size={16} /> LOGIN ON TV / CONSOLE
+          </button>
         </div>
       </div>
     );
@@ -242,34 +320,16 @@ export default function Home() {
         </div>
       </div>
 
-      {/* --- IZUKU PEEKING COMPONENT (UPDATED) --- */}
+      {/* --- IZUKU PEEKING COMPONENT --- */}
       <div className="fixed bottom-0 right-0 z-50 overflow-hidden pointer-events-none">
-        <div
-          onClick={() => router.push('/characters')}
-          className="relative translate-x-16 translate-y-16 group cursor-pointer pointer-events-auto"
-        >
+        <div onClick={() => router.push('/characters')} className="relative translate-x-16 translate-y-16 group cursor-pointer pointer-events-auto">
           {/* Bubble */}
           <div className="absolute bottom-full translate-x-(-40) right-[45%] mb-[-5px] transform scale-0 group-hover:scale-100 transition-transform duration-300 origin-bottom-right drop-shadow-lg">
             <img src="/comic-bubble.png" alt="Psstt.." className="w-32 h-auto" />
-            <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[65%] text-black font-black italic text-base">
-              Psstt..
-            </span>
+            <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[65%] text-black font-black italic text-base">Psstt..</span>
           </div>
-
           {/* Deku */}
-          <img
-            src="/izuku-peek.webp"
-            alt="Izuku"
-            className="
-        w-24 md:w-32 h-auto object-contain 
-        transform transition-all duration-500 ease-out drop-shadow-2xl
-
-        rotate-[-20deg]  /* default tilt */
-
-        group-hover:translate-x-4 group-hover:translate-y-4 
-        group-hover:rotate-[-20deg] /* keeps tilt while moving */
-      "
-          />
+          <img src="/izuku-peek.webp" alt="Izuku" className="w-24 md:w-32 h-auto object-contain transform transition-all duration-500 ease-out drop-shadow-2xl rotate-[-20deg] group-hover:translate-x-4 group-hover:translate-y-4 group-hover:rotate-[-20deg]" />
         </div>
       </div>
 

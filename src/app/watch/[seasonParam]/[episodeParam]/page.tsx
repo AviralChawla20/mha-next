@@ -48,6 +48,7 @@ export default function WatchPage() {
 
     const [savedTime, setSavedTime] = useState(0);
     const [hasResumed, setHasResumed] = useState(false);
+    const [showResumeToast, setShowResumeToast] = useState(false);
 
     const [isIframeMode, setIsIframeMode] = useState(false);
     const [videoError, setVideoError] = useState(false);
@@ -236,6 +237,8 @@ export default function WatchPage() {
                 const safeResumeTime = Math.max(0, savedTime - 5);
                 videoRef.current.currentTime = safeResumeTime;
                 setHasResumed(true);
+                setShowResumeToast(true);
+                setTimeout(() => setShowResumeToast(false), 3000);
             }
         }
     };
@@ -282,6 +285,7 @@ export default function WatchPage() {
             const nextEp = animeData[nextIndex] as AnimeEpisode;
             const nextSeasonId = formatSeasonToId(nextEp.season);
             const nextEpId = `e${nextEp.episodeNumber}`;
+
             router.push(`/watch/${nextSeasonId}/${nextEpId}`);
         }
     };
@@ -406,7 +410,7 @@ export default function WatchPage() {
                                         max="100"
                                         value={progress}
                                         onChange={handleSeek}
-                                        className="flex-1 h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-yellow-400 hover:h-2 transition-all"
+                                        className={`flex-1 h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-yellow-400 hover:h-2 transition-all ${showResumeToast ? 'shadow-[0_0_15px_rgba(250,204,21,0.8)]' : ''}`}
                                     />
                                     <span className="text-xs font-mono text-slate-300 w-12">{formatTime(duration)}</span>
                                 </div>
@@ -456,6 +460,14 @@ export default function WatchPage() {
                                     <div className="w-20 h-20 rounded-full bg-yellow-400/90 flex items-center justify-center shadow-lg hover:scale-110 transition-transform backdrop-blur-sm">
                                         <Play size={40} className="text-black ml-2" fill="currentColor" />
                                     </div>
+                                </div>
+                            )}
+
+                            {/* Resume Toast */}
+                            {showResumeToast && (
+                                <div className="absolute top-8 left-1/2 -translate-x-1/2 bg-black/80 text-white px-6 py-2 rounded-full border border-yellow-400/30 shadow-[0_0_20px_rgba(250,204,21,0.3)] animate-in fade-in slide-in-from-top-4 duration-500 flex items-center gap-3 backdrop-blur-md">
+                                    <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
+                                    <span className="font-bold text-sm tracking-wide">Resuming at {formatTime(videoRef.current?.currentTime || 0)}</span>
                                 </div>
                             )}
                         </div>
