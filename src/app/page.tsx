@@ -70,36 +70,58 @@ export default function Home() {
   }, [supabase]);
 
   // --- TV LOGIN LOGIC ---
+  // --- TV LOGIN LOGIC ---
+  // --- TV LOGIN LOGIC ---
   const generateTvCode = async () => {
-    // Generate a random 6-character code (A-Z, 0-9)
+    // 1. Generate Code
     const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+    console.log("TV: Generated Code:", code);
     setTvCode(code);
 
-    // Insert into DB
-    await supabase.from('tv_codes').insert({ code });
+    // 2. Insert into DB
+    const { error } = await supabase.from('tv_codes').insert({ code });
+    if (error) console.error("TV: Insert Error:", error);
 
-    // Listen for updates to this specific code
+    // 3. Listen for updates
+    console.log(`TV: Listening for updates on code: ${code}...`);
+
     const channel = supabase.channel(`tv_login_${code}`)
       .on(
         'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'tv_codes', filter: `code=eq.${code}` },
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'tv_codes',
+          filter: `code=eq.${code}`
+        },
         async (payload) => {
-          if (payload.new.refresh_token) {
-            // WE GOT THE TOKEN! Login the TV.
+          console.log("TV: Received Payload:", payload);
+
+          // CHECK FOR BOTH TOKENS
+          if (payload.new.refresh_token && payload.new.access_token) {
+            console.log("TV: Tokens received! Logging in...");
+
             const { error } = await supabase.auth.setSession({
               refresh_token: payload.new.refresh_token,
-              access_token: payload.new.refresh_token // Supabase will auto-refresh if valid
+              access_token: payload.new.access_token, // <--- NOW VALID JWT
             });
 
-            if (!error) {
-              window.location.reload(); // Refresh to load the dashboard
+            if (error) {
+              console.error("TV: Login Error:", error);
+            } else {
+              console.log("TV: Login Success! Reloading...");
+              window.location.reload();
             }
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log("TV: Subscription Status:", status);
+      });
 
-    return () => supabase.removeChannel(channel);
+    return () => {
+      supabase.removeChannel(channel);
+    };
   };
 
   // --- RANK LOGIC ---

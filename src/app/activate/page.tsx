@@ -21,15 +21,21 @@ export default function ActivatePage() {
             return;
         }
 
-        // 2. Send the token to the TV via the database
-        // Note: We use the refresh_token so the TV can mint its own access token
+        // 2. Send BOTH tokens to the TV
         const { error } = await supabase
             .from('tv_codes')
-            .update({ refresh_token: session.refresh_token })
+            .update({
+                refresh_token: session.refresh_token,
+                access_token: session.access_token // <--- NOW SENDING THIS
+            })
             .eq('code', code.toUpperCase());
 
-        if (error) setStatus('error');
-        else setStatus('success');
+        if (error) {
+            console.error(error);
+            setStatus('error');
+        } else {
+            setStatus('success');
+        }
     };
 
     return (
