@@ -17,14 +17,7 @@ export const season1Data = [
     episodeNumber: 2,
     theme: "yellow",
     videoUrl:
-      "https://drive.google.com/file/d/1NO3iX6Spr51Qz1ZBgVh9zeK8vss7LpJ6/view?usp=drive_link",
-    subtitles: [
-      {
-        label: "English",
-        lang: "en",
-        src: "/subtitles/s1e2.vtt" // Path starts with /
-      },
-    ]
+      "https://drive.google.com/file/d/1wCtx-mmKiY5jCLb52srnRm0F8eGApPK7/view?usp=drive_link",
   },
   {
     title: "Roaring Muscles",
@@ -1705,7 +1698,7 @@ export const animeData = [
     theme: "pink",
     season: "ova",
     episodeNumber: 5,
-    videoUrl:"https://drive.google.com/file/d/1rjZ1Qvzgo57p-bzqVg-ewaznz3Os32rD/view?usp=drive_link"
+    videoUrl:"https://drive.google.com/file/d/1xQQUfpJh_vMT0TSPO-jYDQ_xHU05lMPj/view?usp=drive_link"
   },
   {
     title: "World Heroes’ Mission",

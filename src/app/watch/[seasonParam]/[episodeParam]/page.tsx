@@ -37,6 +37,9 @@ export default function WatchPage() {
     const videoRef = useRef<HTMLVideoElement>(null);
     const saveIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+    // NEW: Ref to store the idle timer ID
+    const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
     const [currentTime, setCurrentTime] = useState(0);
@@ -126,6 +129,37 @@ export default function WatchPage() {
         return () => { if (saveIntervalRef.current) clearInterval(saveIntervalRef.current); };
     }, [isPlaying, saveProgress]);
 
+    // NEW: Handle Mouse Movement (Idle Timer)
+    const handleMouseMove = useCallback(() => {
+        setShowControls(true);
+
+        if (controlsTimeoutRef.current) {
+            clearTimeout(controlsTimeoutRef.current);
+        }
+
+        if (isPlaying) {
+            controlsTimeoutRef.current = setTimeout(() => {
+                setShowControls(false);
+            }, 2500); // Hide after 2.5 seconds of no movement
+        }
+    }, [isPlaying]);
+
+    // NEW: Effect to manage controls when play state changes
+    useEffect(() => {
+        if (isPlaying) {
+            handleMouseMove();
+        } else {
+            setShowControls(true);
+            if (controlsTimeoutRef.current) {
+                clearTimeout(controlsTimeoutRef.current);
+            }
+        }
+        return () => {
+            if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+        };
+    }, [isPlaying, handleMouseMove]);
+
+
     const togglePlay = useCallback(() => {
         if (videoRef.current) {
             if (videoRef.current.paused) {
@@ -141,6 +175,12 @@ export default function WatchPage() {
     // --- KEYBOARD SHORTCUTS ---
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
+            // Only trigger shortcuts if the video is focused or no other input is focused
+            if (document.activeElement?.tagName === 'INPUT') return;
+
+            // Trigger idle timer on key press too
+            handleMouseMove();
+
             if (!videoRef.current) return;
 
             switch (e.key) {
@@ -155,12 +195,16 @@ export default function WatchPage() {
                     e.preventDefault(); // Prevent page scroll
                     togglePlay();
                     break;
+                case 'f':
+                case 'F':
+                    toggleFullscreen();
+                    break;
             }
         };
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [togglePlay]); // Dependency on togglePlay
+    }, [togglePlay, handleMouseMove]);
 
     const handleTimeUpdate = () => {
         if (videoRef.current) {
@@ -172,6 +216,7 @@ export default function WatchPage() {
     };
 
     const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+        handleMouseMove(); // Reset timer when interacting
         if (videoRef.current) {
             const seekTime = (Number(e.target.value) / 100) * videoRef.current.duration;
             videoRef.current.currentTime = seekTime;
@@ -180,6 +225,7 @@ export default function WatchPage() {
     };
 
     const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        handleMouseMove(); // Reset timer when interacting
         const newVol = Number(e.target.value);
         setVolume(newVol);
         if (videoRef.current) {
@@ -190,6 +236,7 @@ export default function WatchPage() {
     };
 
     const toggleMute = () => {
+        handleMouseMove();
         if (videoRef.current) {
             const newMuted = !isMuted;
             videoRef.current.muted = newMuted;
@@ -202,6 +249,7 @@ export default function WatchPage() {
     };
 
     const cyclePlaybackSpeed = () => {
+        handleMouseMove();
         const speeds = [1.0, 1.25, 1.5, 2.0];
         const nextSpeedIndex = (speeds.indexOf(playbackRate) + 1) % speeds.length;
         const nextSpeed = speeds[nextSpeedIndex];
@@ -212,6 +260,7 @@ export default function WatchPage() {
     };
 
     const toggleFullscreen = () => {
+        handleMouseMove();
         if (videoRef.current && videoRef.current.parentElement) {
             if (!document.fullscreenElement) {
                 videoRef.current.parentElement.requestFullscreen();
@@ -223,6 +272,7 @@ export default function WatchPage() {
 
     const handleVideoEnded = () => {
         setIsPlaying(false);
+        setShowControls(true); // Always show controls when ended
         if (videoRef.current) {
             saveProgress(videoRef.current.duration, videoRef.current.duration, true);
         }
@@ -252,6 +302,7 @@ export default function WatchPage() {
     useEffect(() => {
         setVideoError(false);
         setIsPlaying(false);
+        setShowControls(true); // Reset controls visibility on new ep
         setProgress(0);
         setHasResumed(false);
         setSavedTime(0);
@@ -338,9 +389,17 @@ export default function WatchPage() {
                         ></iframe>
                     ) : (
                         <div
-                            className="relative w-full h-full bg-black"
-                            onMouseEnter={() => setShowControls(true)}
-                            onMouseLeave={() => isPlaying && setShowControls(false)}
+                            // UPDATED: Added cursor-none class, onMouseMove handler
+                            className={`relative w-full h-full bg-black ${!showControls && isPlaying ? 'cursor-none' : 'cursor-default'}`}
+                            onMouseMove={handleMouseMove}
+                            onMouseLeave={() => {
+                                // If we leave the player area completely (windowed mode), hide immediately
+                                if (isPlaying) setShowControls(false);
+                            }}
+                            onClick={() => {
+                                // Ensure click triggers UI before play logic handles it
+                                handleMouseMove();
+                            }}
                         >
                             <video
                                 ref={videoRef}
@@ -373,6 +432,7 @@ export default function WatchPage() {
                                                 e.stopPropagation();
                                                 handleNavigate('next');
                                             }}
+                                            onMouseEnter={handleMouseMove} // Keep controls alive if hovering popup
                                         >
                                             <div className="flex items-start gap-4">
                                                 <div className="flex-1">
@@ -390,17 +450,17 @@ export default function WatchPage() {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="absolute top-2 right-2">
-                                                {/* Optional: Close button could go here if needed, but clicking outside or waiting is fine for now */}
-                                            </div>
-                                            {/* Progress bar for auto-play could go here */}
                                         </div>
                                     );
                                 }
                                 return null;
                             })()}
 
-                            <div className={`absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent flex flex-col justify-end p-4 transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0'} ${videoError ? 'hidden' : ''}`}>
+                            <div
+                                // UPDATED: Added onMouseMove to the controls container as well to be safe
+                                onMouseMove={(e) => { e.stopPropagation(); handleMouseMove(); }}
+                                className={`absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent flex flex-col justify-end p-4 transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0'} ${videoError ? 'hidden' : ''}`}
+                            >
 
                                 <div className="flex items-center gap-4 mb-4">
                                     <span className="text-xs font-mono text-slate-300 w-12 text-right">{formatTime(currentTime)}</span>
