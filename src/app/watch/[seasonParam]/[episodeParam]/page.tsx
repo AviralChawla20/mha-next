@@ -1,17 +1,26 @@
 'use client';
 
 import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
-import Script from 'next/script';
 import { useRouter, useParams } from 'next/navigation';
-import { ChevronLeft, AlertCircle, SkipBack, SkipForward, Play, Pause, Maximize, Volume2, VolumeX, RefreshCw, Settings, LayoutTemplate } from 'lucide-react';
+import { ChevronLeft, SkipBack, SkipForward, LayoutTemplate } from 'lucide-react';
 import { animeData } from '@/data';
 import { createClient } from '@/utils/supabase/client';
+
+// --- Constants ---
+const VJS_CSS_URL = 'https://vjs.zencdn.net/8.10.0/video-js.css';
+const VJS_SCRIPT_URL = 'https://vjs.zencdn.net/8.10.0/video.min.js';
+const OCTOPUS_SCRIPT_URL = 'https://cdn.jsdelivr.net/npm/libass-wasm@4.1.0/dist/js/subtitles-octopus.min.js';
+
+// Local files in public/lib/
+const OCTOPUS_WORKER_URL = '/lib/subtitles-octopus-worker.js';
+const OCTOPUS_WASM_URL = '/lib/subtitles-octopus-worker.wasm';
 
 interface AnimeEpisode {
     title: string;
     season: string;
     episodeNumber: number;
     videoUrl?: string;
+    subtitleUrl?: string;
     theme?: string;
     [key: string]: any;
 }
@@ -33,32 +42,25 @@ export default function WatchPage() {
 
     const [userId, setUserId] = useState<string | null>(null);
 
-    // --- PLAYER STATE ---
-    const videoRef = useRef<HTMLVideoElement>(null);
+    // --- Refs ---
+    const videoContainerRef = useRef<HTMLDivElement>(null);
+    const playerRef = useRef<any>(null);
+    const octopusRef = useRef<any>(null);
     const saveIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const stylesInjectedRef = useRef(false);
 
-    // NEW: Ref to store the idle timer ID
-    const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    // Track subtitles state for the 'C' key toggle
+    const isSubsOnRef = useRef(true);
 
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [progress, setProgress] = useState(0);
-    const [currentTime, setCurrentTime] = useState(0);
-    const [duration, setDuration] = useState(0);
-    const [volume, setVolume] = useState(1);
-    const [isMuted, setIsMuted] = useState(false);
-    const [playbackRate, setPlaybackRate] = useState(1.0);
-    const [showControls, setShowControls] = useState(true);
-
+    // --- State ---
+    const [areLibsLoaded, setAreLibsLoaded] = useState(false);
     const [savedTime, setSavedTime] = useState(0);
     const [hasResumed, setHasResumed] = useState(false);
     const [showResumeToast, setShowResumeToast] = useState(false);
-
     const [isIframeMode, setIsIframeMode] = useState(false);
-    const [videoError, setVideoError] = useState(false);
+    const [showNextEpPopup, setShowNextEpPopup] = useState(false);
 
-    const currentUniqueId = `${seasonParam}-${episodeParam}`;
-
-    // --- HELPERS ---
+    // --- Data Calculation ---
     const formatSeasonToId = (seasonString: string) => {
         if (!seasonString) return '';
         return seasonString.toLowerCase()
@@ -78,11 +80,100 @@ export default function WatchPage() {
     }, [seasonParam, episodeParam]);
 
     const episode = animeData[currentEpisodeIndex] as AnimeEpisode;
+    const currentUniqueId = `${seasonParam}-${episodeParam}`;
 
-    // --- DB OPERATIONS ---
+    const getStreamUrl = (rawUrl: string) => {
+        let fileId = "";
+        if (rawUrl.includes('/d/')) {
+            fileId = rawUrl.split('/d/')[1]?.split('/')[0];
+        } else if (rawUrl.includes('id=')) {
+            fileId = rawUrl.split('id=')[1]?.split('&')[0];
+        }
+        return fileId ? `/api/stream?fileId=${fileId}` : "";
+    };
+
+    // --- 0. Inject Custom CSS ---
+    useEffect(() => {
+        if (stylesInjectedRef.current) return;
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .video-js.vjs-user-inactive.vjs-playing .vjs-control-bar {
+                opacity: 0 !important;
+                transition: opacity 1s ease;
+                pointer-events: none;
+            }
+            .vjs-custom-cc-button {
+                font-family: sans-serif;
+                font-weight: bold;
+                cursor: pointer;
+                width: 3em !important; 
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+            }
+            .vjs-custom-cc-button.cc-on {
+                color: #facc15 !important;
+                text-shadow: 0 0 5px rgba(250, 204, 21, 0.5);
+            }
+            .vjs-custom-cc-button.cc-off {
+                color: #9ca3af !important;
+            }
+        `;
+        document.head.appendChild(style);
+        stylesInjectedRef.current = true;
+    }, []);
+
+    // --- 1. Load External Scripts ---
+    useEffect(() => {
+        let vjsLoaded = false;
+        let octopusLoaded = false;
+        const checkReady = () => { if (vjsLoaded && octopusLoaded) setAreLibsLoaded(true); };
+
+        if (!document.querySelector(`link[href="${VJS_CSS_URL}"]`)) {
+            const link = document.createElement('link');
+            link.href = VJS_CSS_URL;
+            link.rel = 'stylesheet';
+            document.head.appendChild(link);
+        }
+
+        if ((window as any).videojs) { vjsLoaded = true; checkReady(); }
+        else {
+            const script = document.createElement('script');
+            script.src = VJS_SCRIPT_URL;
+            script.async = true;
+            script.onload = () => { vjsLoaded = true; checkReady(); };
+            document.body.appendChild(script);
+        }
+
+        if ((window as any).SubtitlesOctopus) { octopusLoaded = true; checkReady(); }
+        else {
+            const script = document.createElement('script');
+            script.src = OCTOPUS_SCRIPT_URL;
+            script.async = true;
+            script.onload = () => { octopusLoaded = true; checkReady(); };
+            document.body.appendChild(script);
+        }
+    }, []);
+
+    // --- 2. DB Progress Fetching ---
+    useEffect(() => {
+        const fetchProgress = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                setUserId(user.id);
+                const { data } = await supabase.from('user_anime').select('progress').eq('episode_id', currentUniqueId).maybeSingle();
+                if (data && data.progress > 10) {
+                    setSavedTime(data.progress);
+                    // We DO NOT set hasResumed to false here immediately, 
+                    // we handle that in the player init to ensure fresh seek
+                }
+            }
+        };
+        fetchProgress();
+    }, [currentUniqueId, supabase]);
+
     const saveProgress = useCallback(async (time: number, totalDuration: number, completed: boolean = false) => {
         if (!userId) return;
-
         const payload = {
             user_id: userId,
             episode_id: currentUniqueId,
@@ -91,244 +182,193 @@ export default function WatchPage() {
             last_watched: new Date().toISOString(),
             ...(completed ? { is_watched: true } : {})
         };
-
         await supabase.from('user_anime').upsert(payload, { onConflict: 'user_id, episode_id' });
     }, [userId, currentUniqueId, supabase]);
 
-    useEffect(() => {
-        const fetchProgress = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                setUserId(user.id);
-                const { data } = await supabase
-                    .from('user_anime')
-                    .select('progress')
-                    .eq('episode_id', currentUniqueId)
-                    .maybeSingle();
-
-                if (data && data.progress > 10) {
-                    setSavedTime(data.progress);
-                    setHasResumed(false);
-                }
-            }
-        };
-        fetchProgress();
-    }, [currentUniqueId, supabase]);
-
-    // --- PLAYER LOGIC ---
-    useEffect(() => {
-        if (isPlaying) {
-            saveIntervalRef.current = setInterval(() => {
-                if (videoRef.current) {
-                    saveProgress(videoRef.current.currentTime, videoRef.current.duration);
-                }
-            }, 10000);
-        } else {
-            if (saveIntervalRef.current) clearInterval(saveIntervalRef.current);
-        }
-        return () => { if (saveIntervalRef.current) clearInterval(saveIntervalRef.current); };
-    }, [isPlaying, saveProgress]);
-
-    // NEW: Handle Mouse Movement (Idle Timer)
-    const handleMouseMove = useCallback(() => {
-        setShowControls(true);
-
-        if (controlsTimeoutRef.current) {
-            clearTimeout(controlsTimeoutRef.current);
-        }
-
-        if (isPlaying) {
-            controlsTimeoutRef.current = setTimeout(() => {
-                setShowControls(false);
-            }, 2500); // Hide after 2.5 seconds of no movement
-        }
-    }, [isPlaying]);
-
-    // NEW: Effect to manage controls when play state changes
-    useEffect(() => {
-        if (isPlaying) {
-            handleMouseMove();
-        } else {
-            setShowControls(true);
-            if (controlsTimeoutRef.current) {
-                clearTimeout(controlsTimeoutRef.current);
-            }
-        }
-        return () => {
-            if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
-        };
-    }, [isPlaying, handleMouseMove]);
-
-
-    const togglePlay = useCallback(() => {
-        if (videoRef.current) {
-            if (videoRef.current.paused) {
-                videoRef.current.play();
-                setIsPlaying(true);
-            } else {
-                videoRef.current.pause();
-                setIsPlaying(false);
-            }
-        }
-    }, []);
-
-    // --- KEYBOARD SHORTCUTS ---
+    // --- 3. Keyboard Shortcuts ---
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            // Only trigger shortcuts if the video is focused or no other input is focused
-            if (document.activeElement?.tagName === 'INPUT') return;
+            if (!playerRef.current) return;
+            const player = playerRef.current;
 
-            // Trigger idle timer on key press too
-            handleMouseMove();
+            // Ignore if user is typing in an input (not likely here, but good practice)
+            if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
 
-            if (!videoRef.current) return;
-
-            switch (e.key) {
-                case 'ArrowLeft':
-                    videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 5);
-                    break;
-                case 'ArrowRight':
-                    videoRef.current.currentTime = Math.min(videoRef.current.duration, videoRef.current.currentTime + 5);
-                    break;
+            switch (e.key.toLowerCase()) {
                 case ' ':
-                case 'Spacebar':
+                case 'k':
                     e.preventDefault(); // Prevent page scroll
-                    togglePlay();
+                    player.paused() ? player.play() : player.pause();
+                    break;
+                case 'arrowleft':
+                case 'j':
+                    e.preventDefault();
+                    player.currentTime(Math.max(0, player.currentTime() - 5));
+                    break;
+                case 'arrowright':
+                case 'l':
+                    e.preventDefault();
+                    player.currentTime(Math.min(player.duration(), player.currentTime() + 5));
                     break;
                 case 'f':
-                case 'F':
-                    toggleFullscreen();
+                    e.preventDefault();
+                    player.isFullscreen() ? player.exitFullscreen() : player.requestFullscreen();
+                    break;
+                case 'c':
+                    e.preventDefault();
+                    // Toggle Subtitles via ref
+                    const btn = document.querySelector('.vjs-custom-cc-button') as HTMLButtonElement;
+                    if (btn) btn.click(); // Reuse the click logic we defined in player init
                     break;
             }
         };
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [togglePlay, handleMouseMove]);
+    }, []);
 
-    const handleTimeUpdate = () => {
-        if (videoRef.current) {
-            const current = videoRef.current.currentTime;
-            const total = videoRef.current.duration || 1;
-            setCurrentTime(current);
-            setProgress((current / total) * 100);
-        }
-    };
 
-    const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-        handleMouseMove(); // Reset timer when interacting
-        if (videoRef.current) {
-            const seekTime = (Number(e.target.value) / 100) * videoRef.current.duration;
-            videoRef.current.currentTime = seekTime;
-            setProgress(Number(e.target.value));
-        }
-    };
+    // --- 4. Initialize Player & Octopus ---
+    // --- 4. Initialize Player & Octopus ---
+    useEffect(() => {
+        if (!areLibsLoaded || !episode || !videoContainerRef.current || isIframeMode || playerRef.current) return;
 
-    const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        handleMouseMove(); // Reset timer when interacting
-        const newVol = Number(e.target.value);
-        setVolume(newVol);
-        if (videoRef.current) {
-            videoRef.current.volume = newVol;
-            videoRef.current.muted = newVol === 0;
-            setIsMuted(newVol === 0);
-        }
-    };
+        // Reset resume state for new episode
+        setHasResumed(false);
 
-    const toggleMute = () => {
-        handleMouseMove();
-        if (videoRef.current) {
-            const newMuted = !isMuted;
-            videoRef.current.muted = newMuted;
-            setIsMuted(newMuted);
-            if (!newMuted && volume === 0) {
-                setVolume(0.5);
-                videoRef.current.volume = 0.5;
+        console.log('Initializing Video.js + Octopus...');
+
+        const videoElement = document.createElement("video-js");
+        videoElement.classList.add('vjs-big-play-centered', 'vjs-fluid');
+        videoContainerRef.current.appendChild(videoElement);
+
+        const streamUrl = getStreamUrl(episode.videoUrl || "");
+
+        const player = (window as any).videojs(videoElement, {
+            controls: true,
+            autoplay: false,
+            preload: 'auto', // changed to 'auto' to help metadata load faster
+            fluid: true,
+            playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 2],
+            inactivityTimeout: 2000,
+            sources: [{ src: streamUrl, type: 'video/mp4' }]
+        }, () => {
+            console.log('Video.js Player Ready');
+
+            // --- UI: Custom CC Button (Only add if subtitles exist) ---
+            if (episode.subtitleUrl && episode.subtitleUrl.trim() !== '') {
+                const controlBar = player.controlBar.el();
+                const ccBtn = document.createElement('button');
+                ccBtn.className = 'vjs-custom-cc-button vjs-control vjs-button cc-on';
+                ccBtn.innerHTML = '<span aria-hidden="true">CC</span>';
+                ccBtn.title = "Toggle Subtitles (C)";
+
+                ccBtn.onclick = () => {
+                    isSubsOnRef.current = !isSubsOnRef.current;
+                    if (isSubsOnRef.current) {
+                        ccBtn.classList.remove('cc-off');
+                        ccBtn.classList.add('cc-on');
+                    } else {
+                        ccBtn.classList.remove('cc-on');
+                        ccBtn.classList.add('cc-off');
+                    }
+                    const canvas = videoElement.parentElement?.querySelector('canvas');
+                    if (canvas) canvas.style.display = isSubsOnRef.current ? 'block' : 'none';
+                };
+
+                const fsButton = controlBar.querySelector('.vjs-fullscreen-control');
+                if (fsButton) controlBar.insertBefore(ccBtn, fsButton);
+                else controlBar.appendChild(ccBtn);
             }
-        }
-    };
+        });
 
-    const cyclePlaybackSpeed = () => {
-        handleMouseMove();
-        const speeds = [1.0, 1.25, 1.5, 2.0];
-        const nextSpeedIndex = (speeds.indexOf(playbackRate) + 1) % speeds.length;
-        const nextSpeed = speeds[nextSpeedIndex];
-        setPlaybackRate(nextSpeed);
-        if (videoRef.current) {
-            videoRef.current.playbackRate = nextSpeed;
-        }
-    };
+        playerRef.current = player;
 
-    const toggleFullscreen = () => {
-        handleMouseMove();
-        if (videoRef.current && videoRef.current.parentElement) {
-            if (!document.fullscreenElement) {
-                videoRef.current.parentElement.requestFullscreen();
-            } else {
-                document.exitFullscreen();
+        // --- CRITICAL FIX: Robust Metadata Handler ---
+        player.on('loadedmetadata', () => {
+            const videoWidth = player.videoWidth();
+            const videoHeight = player.videoHeight();
+            const videoDuration = player.duration();
+
+            console.log(`Metadata: ${videoWidth}x${videoHeight}, ${videoDuration}s`);
+
+            // FIX: Only init subtitles if:
+            // 1. We have a valid URL (not empty string)
+            // 2. The video has reported actual dimensions (prevents "width is 0" crash)
+            const hasValidSubs = episode.subtitleUrl && episode.subtitleUrl.trim() !== '';
+            const hasDimensions = videoWidth > 0 && videoHeight > 0;
+
+            if (hasValidSubs && hasDimensions && (window as any).SubtitlesOctopus && !octopusRef.current) {
+                try {
+                    console.log('Starting Subtitles...');
+                    const videoNode = player.tech().el();
+                    const options = {
+                        video: videoNode,
+                        subUrl: episode.subtitleUrl,
+                        workerUrl: OCTOPUS_WORKER_URL,
+                        wasmUrl: OCTOPUS_WASM_URL,
+                        debug: false
+                    };
+                    octopusRef.current = new (window as any).SubtitlesOctopus(options);
+                } catch (err) {
+                    console.warn('Subtitle Init Skipped:', err);
+                }
+            } else if (!hasValidSubs) {
+                console.log('No subtitles for this episode.');
             }
-        }
-    };
 
-    const handleVideoEnded = () => {
-        setIsPlaying(false);
-        setShowControls(true); // Always show controls when ended
-        if (videoRef.current) {
-            saveProgress(videoRef.current.duration, videoRef.current.duration, true);
-        }
-    };
-
-    const handleLoadedMetadata = () => {
-        if (videoRef.current) {
-            setDuration(videoRef.current.duration);
-            setVideoError(false);
-
-            if (savedTime > 0 && !hasResumed) {
-                const safeResumeTime = Math.max(0, savedTime - 5);
-                videoRef.current.currentTime = safeResumeTime;
+            // Resume Logic
+            if (savedTime > 10) {
+                player.currentTime(savedTime - 5);
                 setHasResumed(true);
                 setShowResumeToast(true);
                 setTimeout(() => setShowResumeToast(false), 3000);
             }
-        }
-    };
+        });
 
-    useEffect(() => {
-        if (seasonParam && episodeParam && currentEpisodeIndex === -1) {
-            router.push('/anime');
-        }
-    }, [currentEpisodeIndex, seasonParam, episodeParam, router]);
+        // --- Event Listeners ---
+        player.on('timeupdate', () => {
+            const current = player.currentTime();
+            const duration = player.duration();
+            if (duration && current && duration - current <= 30 && duration - current > 0) {
+                setShowNextEpPopup(true);
+            } else {
+                setShowNextEpPopup(false);
+            }
+        });
 
-    useEffect(() => {
-        setVideoError(false);
-        setIsPlaying(false);
-        setShowControls(true); // Reset controls visibility on new ep
-        setProgress(0);
-        setHasResumed(false);
-        setSavedTime(0);
-        setIsIframeMode(false);
-    }, [episode]);
+        player.on('play', () => {
+            if (saveIntervalRef.current) clearInterval(saveIntervalRef.current);
+            saveIntervalRef.current = setInterval(() => {
+                const current = player.currentTime();
+                const duration = player.duration();
+                if (current && duration) saveProgress(current, duration);
+            }, 10000);
+        });
 
-    if (!episode) return null;
+        player.on('pause', () => {
+            if (saveIntervalRef.current) clearInterval(saveIntervalRef.current);
+        });
 
-    let videoSource = "";
-    let fileId = "";
-    const rawUrl = episode.videoUrl || "";
+        player.on('ended', () => {
+            const duration = player.duration();
+            if (duration) saveProgress(duration, duration, true);
+            setShowNextEpPopup(false);
+        });
 
-    if (rawUrl.includes('/d/')) {
-        fileId = rawUrl.split('/d/')[1]?.split('/')[0];
-    } else if (rawUrl.includes('id=')) {
-        fileId = rawUrl.split('id=')[1]?.split('&')[0];
-    }
-
-    if (fileId) {
-        videoSource = `/api/stream?fileId=${fileId}`;
-    }
-
-    let iframeSrc = episode.videoUrl;
-    if (iframeSrc && iframeSrc.includes('/view')) {
-        iframeSrc = iframeSrc.replace('/view', '/preview');
-    }
+        return () => {
+            if (saveIntervalRef.current) clearInterval(saveIntervalRef.current);
+            // Strict cleanup order
+            if (octopusRef.current) {
+                try { octopusRef.current.dispose(); } catch (e) { }
+                octopusRef.current = null;
+            }
+            if (player && !player.isDisposed()) {
+                player.dispose();
+                playerRef.current = null;
+            }
+        };
+    }, [areLibsLoaded, episode, isIframeMode, currentUniqueId, savedTime]);
 
     const handleNavigate = (direction: 'next' | 'prev') => {
         const nextIndex = direction === 'next' ? currentEpisodeIndex + 1 : currentEpisodeIndex - 1;
@@ -336,7 +376,6 @@ export default function WatchPage() {
             const nextEp = animeData[nextIndex] as AnimeEpisode;
             const nextSeasonId = formatSeasonToId(nextEp.season);
             const nextEpId = `e${nextEp.episodeNumber}`;
-
             router.push(`/watch/${nextSeasonId}/${nextEpId}`);
         }
     };
@@ -349,13 +388,13 @@ export default function WatchPage() {
         }
     };
 
+    if (!episode) return null;
     const themeColors = getThemeClasses(episode.theme || 'default');
 
-    const formatTime = (time: number) => {
-        const minutes = Math.floor(time / 60);
-        const seconds = Math.floor(time % 60);
-        return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-    };
+    let iframeSrc = episode.videoUrl;
+    if (iframeSrc && iframeSrc.includes('/view')) {
+        iframeSrc = iframeSrc.replace('/view', '/preview');
+    }
 
     return (
         <div className="min-h-screen w-full flex flex-col bg-black overflow-y-auto">
@@ -374,160 +413,36 @@ export default function WatchPage() {
             </div>
 
             <div className="flex-1 flex flex-col items-center justify-center w-full py-8 px-4 md:px-8">
-
-                <Script src="https://iamcdn.net/players/replace-domain.js" strategy="lazyOnload" />
-
-                <div className="w-full max-w-5xl aspect-video relative rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/10 bg-slate-950 group">
-
+                <div className="w-full max-w-5xl aspect-video relative rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/10 bg-slate-950">
                     {isIframeMode ? (
-                        <iframe
-                            src={iframeSrc}
-                            className={`w-full h-full border-0 ${themeColors.shadow}`}
-                            allow="autoplay; fullscreen"
-                            allowFullScreen
-                            title={episode.title}
-                        ></iframe>
+                        <iframe src={iframeSrc} className={`w-full h-full border-0 ${themeColors.shadow}`} allow="autoplay; fullscreen" allowFullScreen title={episode.title} />
                     ) : (
-                        <div
-                            // UPDATED: Added cursor-none class, onMouseMove handler
-                            className={`relative w-full h-full bg-black ${!showControls && isPlaying ? 'cursor-none' : 'cursor-default'}`}
-                            onMouseMove={handleMouseMove}
-                            onMouseLeave={() => {
-                                // If we leave the player area completely (windowed mode), hide immediately
-                                if (isPlaying) setShowControls(false);
-                            }}
-                            onClick={() => {
-                                // Ensure click triggers UI before play logic handles it
-                                handleMouseMove();
-                            }}
-                        >
-                            <video
-                                ref={videoRef}
-                                src={videoSource}
-                                className="w-full h-full object-contain"
-                                onTimeUpdate={handleTimeUpdate}
-                                onLoadedMetadata={handleLoadedMetadata}
-                                onEnded={handleVideoEnded}
-                                onClick={togglePlay}
-                                onError={() => {
-                                    console.log("Video Load Error. Auto-switching to Iframe.");
-                                    setVideoError(true);
-                                    setIsIframeMode(true);
-                                }}
-                            />
+                        <div className="w-full h-full bg-black relative">
+                            {!areLibsLoaded && <div className="absolute inset-0 flex items-center justify-center text-white z-10">Loading Player...</div>}
 
-                            {/* Next Episode Popup */}
-                            {(() => {
-                                const nextIndex = currentEpisodeIndex + 1;
-                                const hasNextEp = nextIndex < animeData.length;
-                                const timeLeft = duration - currentTime;
-                                const showPopup = hasNextEp && timeLeft <= 30 && timeLeft > 0 && !videoError;
+                            <div ref={videoContainerRef} className="w-full h-full" />
 
-                                if (showPopup) {
-                                    const nextEp = animeData[nextIndex] as AnimeEpisode;
-                                    return (
-                                        <div
-                                            className="absolute bottom-24 right-4 z-50 bg-slate-900/90 border border-white/10 p-6 rounded-xl shadow-2xl backdrop-blur-md max-w-sm animate-slide-in-right cursor-pointer hover:bg-slate-800/90 transition-colors group/popup"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleNavigate('next');
-                                            }}
-                                            onMouseEnter={handleMouseMove} // Keep controls alive if hovering popup
-                                        >
-                                            <div className="flex items-start gap-4">
-                                                <div className="flex-1">
-                                                    <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Up Next</p>
-                                                    <p className="text-white font-bold text-lg line-clamp-2 leading-tight group-hover/popup:text-yellow-400 transition-colors">
-                                                        {nextEp.title}
-                                                    </p>
-                                                    <p className="text-slate-500 text-sm mt-1">
-                                                        {nextEp.season} - Episode {nextEp.episodeNumber}
-                                                    </p>
-                                                </div>
-                                                <div className="mt-1">
-                                                    <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center group-hover/popup:bg-yellow-400 group-hover/popup:text-black transition-all">
-                                                        <SkipForward size={24} />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                }
-                                return null;
-                            })()}
-
-                            <div
-                                // UPDATED: Added onMouseMove to the controls container as well to be safe
-                                onMouseMove={(e) => { e.stopPropagation(); handleMouseMove(); }}
-                                className={`absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent flex flex-col justify-end p-4 transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0'} ${videoError ? 'hidden' : ''}`}
-                            >
-
-                                <div className="flex items-center gap-4 mb-4">
-                                    <span className="text-xs font-mono text-slate-300 w-12 text-right">{formatTime(currentTime)}</span>
-                                    <input
-                                        type="range"
-                                        min="0"
-                                        max="100"
-                                        value={progress}
-                                        onChange={handleSeek}
-                                        className={`flex-1 h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-yellow-400 hover:h-2 transition-all ${showResumeToast ? 'shadow-[0_0_15px_rgba(250,204,21,0.8)]' : ''}`}
-                                    />
-                                    <span className="text-xs font-mono text-slate-300 w-12">{formatTime(duration)}</span>
-                                </div>
-
-                                <div className="flex items-center justify-between text-white">
-                                    <div className="flex items-center gap-6">
-                                        <button onClick={togglePlay} className="hover:text-yellow-400 transition-colors transform active:scale-95">
-                                            {isPlaying ? <Pause size={28} /> : <Play size={28} fill="currentColor" />}
-                                        </button>
-
-                                        <div className="flex items-center gap-2 group/volume">
-                                            <button onClick={toggleMute} className="hover:text-yellow-400 transition-colors">
-                                                {isMuted || volume === 0 ? <VolumeX size={22} /> : <Volume2 size={22} />}
-                                            </button>
-                                            <input
-                                                type="range"
-                                                min="0"
-                                                max="1"
-                                                step="0.1"
-                                                value={isMuted ? 0 : volume}
-                                                onChange={handleVolumeChange}
-                                                className="w-0 overflow-hidden group-hover/volume:w-24 transition-all duration-300 h-1 bg-slate-600 rounded-lg accent-white cursor-pointer"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-4">
-                                        <button
-                                            onClick={cyclePlaybackSpeed}
-                                            className="text-xs font-bold font-mono bg-white/10 hover:bg-white/20 px-2 py-1 rounded transition-colors w-12"
-                                        >
-                                            {playbackRate}x
-                                        </button>
-
-                                        <button onClick={toggleFullscreen} className="hover:text-yellow-400 transition-colors">
-                                            <Maximize size={22} />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {!isPlaying && !videoError && (
+                            {showNextEpPopup && currentEpisodeIndex < animeData.length - 1 && (
                                 <div
-                                    onClick={togglePlay}
-                                    className="absolute inset-0 flex items-center justify-center cursor-pointer bg-black/20 hover:bg-black/10 transition-colors"
+                                    className="absolute bottom-20 right-4 z-[50] bg-slate-900/90 border border-white/10 p-4 rounded-xl shadow-2xl backdrop-blur-md max-w-xs cursor-pointer hover:bg-slate-800/90 transition-colors group/popup animate-in slide-in-from-right-10"
+                                    onClick={(e) => { e.stopPropagation(); handleNavigate('next'); }}
                                 >
-                                    <div className="w-20 h-20 rounded-full bg-yellow-400/90 flex items-center justify-center shadow-lg hover:scale-110 transition-transform backdrop-blur-sm">
-                                        <Play size={40} className="text-black ml-2" fill="currentColor" />
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex-1">
+                                            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Up Next</p>
+                                            <p className="text-white font-bold text-sm line-clamp-1 group-hover/popup:text-yellow-400 transition-colors">{(animeData[currentEpisodeIndex + 1] as AnimeEpisode).title}</p>
+                                        </div>
+                                        <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover/popup:bg-yellow-400 group-hover/popup:text-black transition-all">
+                                            <SkipForward size={20} />
+                                        </div>
                                     </div>
                                 </div>
                             )}
 
-                            {/* Resume Toast */}
                             {showResumeToast && (
-                                <div className="absolute top-8 left-1/2 -translate-x-1/2 bg-black/80 text-white px-6 py-2 rounded-full border border-yellow-400/30 shadow-[0_0_20px_rgba(250,204,21,0.3)] animate-in fade-in slide-in-from-top-4 duration-500 flex items-center gap-3 backdrop-blur-md">
+                                <div className="absolute top-8 left-1/2 -translate-x-1/2 bg-black/80 text-white px-6 py-2 rounded-full border border-yellow-400/30 shadow-[0_0_20px_rgba(250,204,21,0.3)] animate-in fade-in slide-in-from-top-4 duration-500 flex items-center gap-3 backdrop-blur-md z-[50]">
                                     <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
-                                    <span className="font-bold text-sm tracking-wide">Resuming at {formatTime(videoRef.current?.currentTime || 0)}</span>
+                                    <span className="font-bold text-sm tracking-wide">Resumed at {Math.floor(savedTime / 60)}:{Math.floor(savedTime % 60).toString().padStart(2, '0')}</span>
                                 </div>
                             )}
                         </div>
@@ -538,45 +453,34 @@ export default function WatchPage() {
                     <h1 className="text-white font-black uppercase italic text-xl hidden md:block">{episode.title}</h1>
                     <button
                         onClick={() => {
-                            setHasResumed(false); // Allow re-seeking if they switch back
+                            if (playerRef.current) { playerRef.current.dispose(); playerRef.current = null; }
+                            if (octopusRef.current) { octopusRef.current.dispose(); octopusRef.current = null; }
                             setIsIframeMode(!isIframeMode);
                         }}
                         className="flex items-center gap-2 text-xs text-slate-500 hover:text-white underline decoration-slate-600 underline-offset-4 ml-auto"
                     >
                         <LayoutTemplate size={14} />
-                        {isIframeMode ? "Switch to Custom Player" : "Video not loading? Switch to Fallback"}
+                        {isIframeMode ? "Switch to Custom Player" : "Switch to Fallback Player"}
                     </button>
                 </div>
             </div>
 
             <div className="w-full bg-slate-900 border-t border-white/10 p-4 md:p-6 z-20 mt-auto">
                 <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
-                    <button
-                        onClick={() => handleNavigate('prev')}
-                        disabled={currentEpisodeIndex === 0}
-                        className="flex items-center gap-2 px-4 py-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-white transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        <SkipBack size={20} />
-                        <span className="hidden md:inline font-bold text-sm uppercase">Previous Ep</span>
+                    <button onClick={() => handleNavigate('prev')} disabled={currentEpisodeIndex === 0} className="flex items-center gap-2 px-4 py-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-white transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <SkipBack size={20} /> <span className="hidden md:inline font-bold text-sm uppercase">Previous Ep</span>
                     </button>
 
                     <div className="text-center hidden md:block">
                         <span className="block text-slate-400 text-[10px] uppercase tracking-widest font-bold">Now Watching</span>
-                        <span className="block text-white font-black text-lg uppercase italic truncate max-w-[200px] md:max-w-md">
-                            {episode.title}
-                        </span>
+                        <span className="block text-white font-black text-lg uppercase italic truncate max-w-[200px] md:max-w-md">{episode.title}</span>
                     </div>
 
-                    <button
-                        onClick={() => handleNavigate('next')}
-                        disabled={currentEpisodeIndex === animeData.length - 1}
-                        className={`flex items-center gap-2 px-4 py-3 rounded-lg ${themeColors.bg} ${themeColors.hoverBg} text-white transition-all active:scale-95 shadow-lg ${themeColors.shadow} disabled:opacity-50 disabled:cursor-not-allowed`}
-                    >
-                        <span className="hidden md:inline font-bold text-sm uppercase">Next Ep</span>
-                        <SkipForward size={20} />
+                    <button onClick={() => handleNavigate('next')} disabled={currentEpisodeIndex === animeData.length - 1} className={`flex items-center gap-2 px-4 py-3 rounded-lg ${themeColors.bg} ${themeColors.hoverBg} text-white transition-all active:scale-95 shadow-lg ${themeColors.shadow} disabled:opacity-50 disabled:cursor-not-allowed`}>
+                        <span className="hidden md:inline font-bold text-sm uppercase">Next Ep</span> <SkipForward size={24} />
                     </button>
                 </div>
             </div>
         </div>
     );
-};
+}

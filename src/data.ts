@@ -8,6 +8,7 @@ export const season1Data = [
     theme: "yellow",
     videoUrl:
       "https://drive.google.com/file/d/1SleDFE3sPjLDiC0sN5fqteqqK80pHpR6/view?usp=drive_link",
+    subtitleUrl:'/subtitles/s1e1.ass'
   },
   {
     title: "What It Takes to Be a Hero",

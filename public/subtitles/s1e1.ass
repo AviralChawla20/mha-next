@@ -1,0 +1,356 @@
+﻿[Script Info]
+; This is an Advanced Sub Station Alpha v4+ script.
+Title: 
+ScriptType: v4.00+
+PlayDepth: 0
+ScaledBorderAndShadow: Yes
+PlayResX: 1920
+PlayResY: 1080
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Arial,75,&H00FFFFFF,&H0000FFFF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,2.2,1.6,2,10,10,10,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:01:12.78,0:01:15.78,Default,,0,0,0,," Izuku Midoriya "
+Dialogue: 0,0:01:16.78,0:01:19.79,Default,,0,0,0,,{\an8}"Tatooin station "
+Dialogue: 0,0:03:03.52,0:03:05.69,Default,,0,0,0,," Papa "
+Dialogue: 0,0:07:04.88,0:07:08.68,Default,,0,0,0,," Episode 1 : lzuku M idoriya: Origin "
+Dialogue: 0,0:07:08.89,0:07:11.76,Default,,0,0,0,,"Aldera Junior High "
+Dialogue: 0,0:07:45.55,0:07:48.18,Default,,0,0,0,," Katsuki Bakugo "
+Dialogue: 0,0:09:20.35,0:09:24.06,Default,,0,0,0,,"The same city"
+Dialogue: 0,0:10:31.63,0:10:35.63,Default,,0,0,0,," Hero Analysis for the Puture "
+Dialogue: 0,0:12:13.07,0:12:18.49,Default,,0,0,0,," Hero Analysis for the Puture "
+Dialogue: 0,0:16:01.67,0:16:05.09,Default,,0,0,0,,"Watch Your Head "
+Dialogue: 0,0:24:01.06,0:24:03.07,Default,,0,0,0,," Next time "
+Dialogue: 0,0:24:27.09,0:24:30.89,Default,,0,0,0,," Next time:What lt Takes to Be a Hero"
+Dialogue: 0,0:00:07.35,0:00:09.13,Default,,0,0,0,,Why are you being so mean?
+Dialogue: 0,0:00:09.51,0:00:11.07,Default,,0,0,0,,You're making him cry Kacchan
+Dialogue: 0,0:00:11.55,0:00:16.49,Default,,0,0,0,,If you keep on hurting him,  I'll stop you\Nmyself.
+Dialogue: 0,0:00:18.43,0:00:20.81,Default,,0,0,0,,[Hmph] You want to pretend to be a hero?
+Dialogue: 0,0:00:22.49,0:00:25.85,Default,,0,0,0,,You don't stand a chance without a quirk,\NDeku.
+Dialogue: 0,0:00:39.62,0:00:40.82,Default,,0,0,0,,Here's the sad truth.
+Dialogue: 0,0:00:41.66,0:00:43.86,Default,,0,0,0,,All men are not created equal.
+Dialogue: 0,0:00:46.94,0:00:51.00,Default,,0,0,0,,When I was four years old, I learned that\Nsome kids have more power than others.
+Dialogue: 0,0:00:53.00,0:00:54.62,Default,,0,0,0,,But that won't hold me back.
+Dialogue: 0,0:00:55.34,0:00:57.44,Default,,0,0,0,,If anything, it pushes me to do better.
+Dialogue: 0,0:01:20.07,0:01:22.57,Default,,0,0,0,,That's one huge supervillain!
+Dialogue: 0,0:01:25.39,0:01:26.59,Default,,0,0,0,,The
+Dialogue: 0,0:02:55.99,0:02:58.51,Default,,0,0,0,,first incident was in Ching Ching City.
+Dialogue: 0,0:03:00.49,0:03:03.73,Default,,0,0,0,,An extraordinary child was born who\Nradiated light.
+Dialogue: 0,0:03:05.77,0:03:09.79,Default,,0,0,0,,After that, reports of people with\Nsuperpowers popped up across the globe.
+Dialogue: 0,0:03:10.07,0:03:11.95,Default,,0,0,0,,No one knew what was causing these quirks.
+Dialogue: 0,0:03:13.15,0:03:16.71,Default,,0,0,0,,Before long, the supernatural became the\Ntotally normal.
+Dialogue: 0,0:03:17.11,0:03:18.31,Default,,0,0,0,,Dreams are reality.
+Dialogue: 0,0:03:19.79,0:03:23.34,Default,,0,0,0,,The world became a superhuman\Nsociety, with about 80%
+Dialogue: 0,0:03:23.34,0:03:26.57,Default,,0,0,0,,of the population possessing\Nsome uncanny ability.
+Dialogue: 0,0:03:27.47,0:03:30.19,Default,,0,0,0,,Our streets look like scenes from comic\Nbooks.
+Dialogue: 0,0:03:30.41,0:03:32.47,Default,,0,0,0,,A city swirled with chaos and confusion.
+Dialogue: 0,0:03:32.77,0:03:35.17,Default,,0,0,0,,A new profession dominated our collective\Nconsciousness.
+Dialogue: 0,0:03:39.05,0:03:41.41,Default,,0,0,0,,It was an age of heroes.
+Dialogue: 0,0:03:51.77,0:03:53.29,Default,,0,0,0,,The Punching Hero!
+Dialogue: 0,0:03:53.61,0:03:55.99,Default,,0,0,0,,I wish I had a quirk that made me super\Nstrong.
+Dialogue: 0,0:04:01.22,0:04:02.82,Default,,0,0,0,,Everyone, please stay back.
+Dialogue: 0,0:04:02.96,0:04:04.68,Default,,0,0,0,,The area is far too dangerous.
+Dialogue: 0,0:04:04.88,0:04:07.42,Default,,0,0,0,,Whoa, the rescue specialist backdrop is\Nhere.
+Dialogue: 0,0:04:07.70,0:04:08.90,Default,,0,0,0,,He'll make sure, okay?
+Dialogue: 0,0:04:10.90,0:04:14.28,Default,,0,0,0,,This guy must be pretty desperate to go\Nfull monster in the middle of the city.
+Dialogue: 0,0:04:14.60,0:04:15.60,Default,,0,0,0,,You know what happened?
+Dialogue: 0,0:04:15.62,0:04:16.82,Default,,0,0,0,,Just some amateur.
+Dialogue: 0,0:04:16.86,0:04:19.14,Default,,0,0,0,,He stole someone's bag and then got\Nhimself cornered.
+Dialogue: 0,0:04:19.28,0:04:21.38,Default,,0,0,0,,A quirk like that and he's just a petty\Nthief.
+Dialogue: 0,0:04:21.76,0:04:22.90,Default,,0,0,0,,I got held up.
+Dialogue: 0,0:04:22.92,0:04:23.76,Default,,0,0,0,,Trains out.
+Dialogue: 0,0:04:23.78,0:04:24.98,Default,,0,0,0,,Another villain.
+Dialogue: 0,0:04:25.14,0:04:26.92,Default,,0,0,0,,I'm not sure when I'm going to make it\Ninto the office.
+Dialogue: 0,0:04:26.92,0:04:29.58,Default,,0,0,0,,A big
+Dialogue: 0,0:04:53.69,0:04:54.65,Default,,0,0,0,,name for himself.
+Dialogue: 0,0:04:54.67,0:04:57.21,Default,,0,0,0,,One look at that dopey grin and I know\Nwhat you are.
+Dialogue: 0,0:04:57.41,0:04:58.61,Default,,0,0,0,,A fanboy.
+Dialogue: 0,0:04:59.25,0:05:00.45,Default,,0,0,0,,Sort of.
+Dialogue: 0,0:05:16.34,0:05:20.72,Default,,0,0,0,,Assault, robbery and illegal use of powers\Nduring rush hour traffic.
+Dialogue: 0,0:05:21.12,0:05:23.66,Default,,0,0,0,,You are the incarnation of evil.
+Dialogue: 0,0:05:26.50,0:05:29.90,Default,,0,0,0,,This special move on Dream Man,\Nchoice of the clergy.
+Dialogue: 0,0:05:30.74,0:05:31.94,Default,,0,0,0,,The pre-emptive.
+Dialogue: 0,0:05:32.30,0:05:33.50,Default,,0,0,0,,Finding.
+Dialogue: 0,0:05:34.14,0:05:35.34,Default,,0,0,0,,Laccertain Prison.
+Dialogue: 0,0:05:36.16,0:05:37.80,Default,,0,0,0,,Can you cut off?
+Dialogue: 0,0:05:51.14,0:05:52.16,Default,,0,0,0,,Masha.
+Dialogue: 0,0:05:52.18,0:05:53.38,Default,,0,0,0,,Masha.
+Dialogue: 0,0:05:54.10,0:05:54.18,Default,,0,0,0,,Masha.
+Dialogue: 0,0:05:54.18,0:05:56.80,Default,,0,0,0,,Piece of cake for the world's next hottest\Nhero.
+Dialogue: 0,0:05:57.24,0:05:59.18,Default,,0,0,0,,Hi there everyone, I'm Mount Lady.
+Dialogue: 0,0:05:59.86,0:06:02.10,Default,,0,0,0,,And you don't have to worry about this\Nbomb anymore.
+Dialogue: 0,0:06:02.66,0:06:03.22,Default,,0,0,0,,Masha.
+Dialogue: 0,0:06:03.22,0:06:03.58,Default,,0,0,0,,Masha.
+Dialogue: 0,0:06:03.60,0:06:04.80,Default,,0,0,0,,Masha.
+Dialogue: 0,0:06:05.18,0:06:05.90,Default,,0,0,0,,Masha.
+Dialogue: 0,0:06:05.92,0:06:05.92,Default,,0,0,0,,Masha.
+Dialogue: 0,0:06:05.92,0:06:06.46,Default,,0,0,0,,Masha.
+Dialogue: 0,0:06:06.48,0:06:06.82,Default,,0,0,0,,Masha.
+Dialogue: 0,0:06:06.84,0:06:08.80,Default,,0,0,0,,Wait, she's getting all the credit?
+Dialogue: 0,0:06:10.12,0:06:14.40,Default,,0,0,0,,With the rise of superpowers came an\Nexplosive increase in criminal activity.
+Dialogue: 0,0:06:15.66,0:06:18.82,Default,,0,0,0,,While governments were stuck trying to\Nfigure out how to reform laws with quirks
+Dialogue: 0,0:06:18.82,0:06:23.86,Default,,0,0,0,,in mind, courageous people started performing\Nheroic acts to keep our cities safe.
+Dialogue: 0,0:06:24.26,0:06:27.10,Default,,0,0,0,,Protecting us against villains who abused\Ntheir powers for evil.
+Dialogue: 0,0:06:27.68,0:06:29.96,Default,,0,0,0,,With overwhelming public\Nsupport, heroes found in
+Dialogue: 0,0:06:29.96,0:06:32.72,Default,,0,0,0,,official places peacekeepers\Noverseen by the government.
+Dialogue: 0,0:06:34.04,0:06:37.64,Default,,0,0,0,,Those who performed the best were paid the\Nmost and got all the fame and glory.
+Dialogue: 0,0:06:37.92,0:06:40.72,Default,,0,0,0,,Their careers depended on their ability to\Nstay in the spotlight.
+Dialogue: 0,0:06:44.16,0:06:45.52,Default,,0,0,0,,Gigantification, huh?
+Dialogue: 0,0:06:45.70,0:06:48.46,Default,,0,0,0,,Well, she's definitely got the looks and\Nattitude to be a crowd favorite.
+Dialogue: 0,0:06:48.48,0:06:50.90,Default,,0,0,0,,And her quirk is really showing,\Nbut it'll be kind of hard for her to get
+Dialogue: 0,0:06:50.90,0:06:53.18,Default,,0,0,0,,her on much in the city without damaging\Nlots of things.
+Dialogue: 0,0:06:53.20,0:06:55.36,Default,,0,0,0,,That means she might not be very useful.
+Dialogue: 0,0:06:55.52,0:06:56.72,Default,,0,0,0,,What's that, Bad Boy?
+Dialogue: 0,0:06:56.74,0:06:58.18,Default,,0,0,0,,You take a notes over there?
+Dialogue: 0,0:06:58.36,0:06:59.90,Default,,0,0,0,,Wanna be a hero too, huh?
+Dialogue: 0,0:07:01.98,0:07:04.24,Default,,0,0,0,,Yes, more than anything.
+Dialogue: 0,0:07:09.76,0:07:14.66,Default,,0,0,0,,So, as third-year students, it's time to\Nstart thinking seriously about your
+Dialogue: 0,0:07:14.66,0:07:16.74,Default,,0,0,0,,futures and what you want to do with your\Nlives.
+Dialogue: 0,0:07:17.26,0:07:21.76,Default,,0,0,0,,I could pass out some career-aptitude\Ntests, but why bother?
+Dialogue: 0,0:07:25.40,0:07:28.06,Default,,0,0,0,,No, you all want to go to the hero track.
+Dialogue: 0,0:07:29.48,0:07:32.12,Default,,0,0,0,,Yes, yes, you've got\Nsome very impressive
+Dialogue: 0,0:07:32.12,0:07:34.78,Default,,0,0,0,,quirks, but no power\Nusage allowed in school.
+Dialogue: 0,0:07:35.06,0:07:36.08,Default,,0,0,0,,Get a hold of yourselves.
+Dialogue: 0,0:07:36.10,0:07:37.30,Default,,0,0,0,,Hey, teach.
+Dialogue: 0,0:07:37.40,0:07:39.64,Default,,0,0,0,,Don't let me in with this bunch of losers.
+Dialogue: 0,0:07:39.96,0:07:42.12,Default,,0,0,0,,I'm the real deal, but\Nthese guys will be lucky
+Dialogue: 0,0:07:42.12,0:07:45.24,Default,,0,0,0,,to end up a sidekick to\Nsome busted de-lister.
+Dialogue: 0,0:07:47.48,0:07:50.08,Default,,0,0,0,,You think you're better than that,\NKatsuki!
+Dialogue: 0,0:07:50.74,0:07:52.70,Default,,0,0,0,,Let's go, I'll take you all on!
+Dialogue: 0,0:07:53.54,0:07:55.36,Default,,0,0,0,,You've got impressive test results.
+Dialogue: 0,0:07:55.78,0:07:57.32,Default,,0,0,0,,Maybe you will get into UA high.
+Dialogue: 0,0:07:57.32,0:07:59.28,Default,,0,0,0,,He's gonna try for the national school.
+Dialogue: 0,0:07:59.30,0:08:01.60,Default,,0,0,0,,That school has a 0.2% acceptance rate.
+Dialogue: 0,0:08:01.62,0:08:03.06,Default,,0,0,0,,It's impossible to get into.
+Dialogue: 0,0:08:03.18,0:08:05.86,Default,,0,0,0,,That's exactly why it's the only place\Nworthy of me.
+Dialogue: 0,0:08:07.50,0:08:09.34,Default,,0,0,0,,I ache off the mock tests.
+Dialogue: 0,0:08:09.72,0:08:12.52,Default,,0,0,0,,I'm the only one at this school who stands\Na chance at getting in.
+Dialogue: 0,0:08:12.98,0:08:17.62,Default,,0,0,0,,I'll end up more popular than all might\Nhimself, and be the richest hero of all time.
+Dialogue: 0,0:08:17.98,0:08:22.26,Default,,0,0,0,,People all across the world will know who\NI am, and it all starts with UA high!
+Dialogue: 0,0:08:22.40,0:08:23.58,Default,,0,0,0,,Oh, yeah, Midoriya.
+Dialogue: 0,0:08:23.60,0:08:25.22,Default,,0,0,0,,Don't you want to go to UA, too?
+Dialogue: 0,0:08:27.44,0:08:28.64,Default,,0,0,0,,Yeah,
+Dialogue: 0,0:08:31.46,0:08:32.80,Default,,0,0,0,,you're kidding, right?
+Dialogue: 0,0:08:32.96,0:08:35.76,Default,,0,0,0,,There's no way you're getting into the\Nhero course without a quirk.
+Dialogue: 0,0:08:35.78,0:08:38.04,Default,,0,0,0,,Well, actually, they got rid of that rule.
+Dialogue: 0,0:08:38.12,0:08:39.64,Default,,0,0,0,,I could be the first one.
+Dialogue: 0,0:08:42.42,0:08:43.98,Default,,0,0,0,,Listen up, Deku.
+Dialogue: 0,0:08:44.20,0:08:48.12,Default,,0,0,0,,You're even worse than the rest of these\Ndamn rejects you quirkless wannabe.
+Dialogue: 0,0:08:48.30,0:08:51.34,Default,,0,0,0,,You really think they'd let someone like\Nyou in when they could have me?
+Dialogue: 0,0:08:52.02,0:08:53.98,Default,,0,0,0,,No way, you've got it all wrong.
+Dialogue: 0,0:08:54.00,0:08:54.82,Default,,0,0,0,,Really?
+Dialogue: 0,0:08:54.84,0:08:56.20,Default,,0,0,0,,I'm not trying to compete against you.
+Dialogue: 0,0:08:56.20,0:08:58.24,Default,,0,0,0,,You've got to believe me!
+Dialogue: 0,0:08:58.96,0:09:02.40,Default,,0,0,0,,It's just that I've wanted to be a hero\Nsince I was little.
+Dialogue: 0,0:09:02.60,0:09:06.82,Default,,0,0,0,,I may not have a quirk, but I can still\Ntry my hardest, can I?
+Dialogue: 0,0:09:06.84,0:09:09.42,Default,,0,0,0,,You'd never be able to hang with the best\Nof the best.
+Dialogue: 0,0:09:09.58,0:09:10.80,Default,,0,0,0,,You'd die in the exams!
+Dialogue: 0,0:09:12.36,0:09:13.74,Default,,0,0,0,,Defenseless is Zuku!
+Dialogue: 0,0:09:14.04,0:09:15.38,Default,,0,0,0,,The school's already crappy.
+Dialogue: 0,0:09:15.52,0:09:18.40,Default,,0,0,0,,You really won't embarrass it more by\Nfailing so hard.
+Dialogue: 0,0:09:20.06,0:09:26.42,Default,,0,0,0,,Hey, get back here!
+Dialogue: 0,0:09:26.52,0:09:27.94,Default,,0,0,0,,If someone stops that monster!
+Dialogue: 0,0:09:28.28,0:09:29.54,Default,,0,0,0,,Yeah, I won!
+Dialogue: 0,0:09:29.72,0:09:31.18,Default,,0,0,0,,Suckerless catches mine!
+Dialogue: 0,0:09:34.08,0:09:35.78,Default,,0,0,0,,Dude, where are all the heroes?
+Dialogue: 0,0:09:35.96,0:09:36.46,Default,,0,0,0,,We're here.
+Dialogue: 0,0:09:36.48,0:09:38.40,Default,,0,0,0,,Normally, someone would swoop in right\Naway.
+Dialogue: 0,0:09:38.42,0:09:40.90,Default,,0,0,0,,Maybe they're all still busy from that\Nscene this morning.
+Dialogue: 0,0:09:41.34,0:09:44.54,Default,,0,0,0,,Remember when we didn't have to worry\Nabout randos with quarts all the time?
+Dialogue: 0,0:09:44.90,0:09:47.08,Default,,0,0,0,,Seriously, there's no stopping them.
+Dialogue: 0,0:09:47.62,0:09:48.94,Default,,0,0,0,,Yes, there is.
+Dialogue: 0,0:09:52.32,0:09:53.88,Default,,0,0,0,,You know why.
+Dialogue: 0,0:09:58.80,0:10:00.00,Default,,0,0,0,,I am here!
+Dialogue: 0,0:10:11.58,0:10:13.66,Default,,0,0,0,,Oh, yeah, we should go to karaoke tonight.
+Dialogue: 0,0:10:13.68,0:10:14.88,Default,,0,0,0,,Yeah, let's go.
+Dialogue: 0,0:10:15.70,0:10:18.70,Default,,0,0,0,,Man, that fight from this morning is all\Nover the news.
+Dialogue: 0,0:10:19.12,0:10:21.44,Default,,0,0,0,,Better write some notes down before I\Nforget anything.
+Dialogue: 0,0:10:25.08,0:10:28.42,Default,,0,0,0,,I don't know what you think you're doing,\NDeku, but we're not done.
+Dialogue: 0,0:10:28.60,0:10:29.64,Default,,0,0,0,,What you got?
+Dialogue: 0,0:10:29.66,0:10:30.64,Default,,0,0,0,,His diary?
+Dialogue: 0,0:10:30.66,0:10:31.86,Default,,0,0,0,,Huh?
+Dialogue: 0,0:10:32.60,0:10:35.12,Default,,0,0,0,,Don't tell me you're taking notes on how\Nto be a hero.
+Dialogue: 0,0:10:35.64,0:10:36.98,Default,,0,0,0,,It's so pathetic!
+Dialogue: 0,0:10:37.66,0:10:38.86,Default,,0,0,0,,He's delusional!
+Dialogue: 0,0:10:39.02,0:10:40.14,Default,,0,0,0,,A real funny guy!
+Dialogue: 0,0:10:40.16,0:10:41.40,Default,,0,0,0,,Just give it back!
+Dialogue: 0,0:10:44.64,0:10:45.86,Default,,0,0,0,,That's so mean!
+Dialogue: 0,0:10:48.90,0:10:51.66,Default,,0,0,0,,Most first-string heroes show potential\Nearly on.
+Dialogue: 0,0:10:51.68,0:10:54.44,Default,,0,0,0,,People look at them and just know they're\Ndestined for greatness.
+Dialogue: 0,0:10:54.68,0:10:57.92,Default,,0,0,0,,When I'm the only student from the\NSkarbage Junior High to get into UA,
+Dialogue: 0,0:10:58.04,0:11:00.00,Default,,0,0,0,,people will start talking about me like\Nthat.
+Dialogue: 0,0:11:00.30,0:11:02.40,Default,,0,0,0,,They'll realize I'm legit the next big\Nthing.
+Dialogue: 0,0:11:02.40,0:11:04.22,Default,,0,0,0,,That's not ego talking.
+Dialogue: 0,0:11:04.24,0:11:05.44,Default,,0,0,0,,I just know I'm good.
+Dialogue: 0,0:11:05.86,0:11:07.06,Default,,0,0,0,,Ego!
+Dialogue: 0,0:11:08.54,0:11:10.60,Default,,0,0,0,,There's a little word of advice,\Nnerd.
+Dialogue: 0,0:11:12.00,0:11:14.38,Default,,0,0,0,,Don't even think of applying, or else.
+Dialogue: 0,0:11:19.48,0:11:20.78,Default,,0,0,0,,That's just sad.
+Dialogue: 0,0:11:21.40,0:11:23.70,Default,,0,0,0,,I thought you at least had some fight in\Nyou.
+Dialogue: 0,0:11:23.88,0:11:25.24,Default,,0,0,0,,He finally gets it.
+Dialogue: 0,0:11:25.26,0:11:26.50,Default,,0,0,0,,He'll never be a hero.
+Dialogue: 0,0:11:26.64,0:11:29.08,Default,,0,0,0,,Better to find out now instead of later,\NI guess.
+Dialogue: 0,0:11:31.06,0:11:32.86,Default,,0,0,0,,You know, if you really\Nwant to be a hero that
+Dialogue: 0,0:11:32.86,0:11:35.50,Default,,0,0,0,,badly, there actually\Nmight be another way.
+Dialogue: 0,0:11:35.54,0:11:38.20,Default,,0,0,0,,Just pray that you'll be born with a quirk\Nin your next life.
+Dialogue: 0,0:11:38.54,0:11:40.70,Default,,0,0,0,,And take a swan dive off the roof of the\Nbuilding.
+Dialogue: 0,0:11:45.84,0:11:47.04,Default,,0,0,0,,Something wrong.
+Dialogue: 0,0:11:54.65,0:11:55.85,Default,,0,0,0,,That idiot.
+Dialogue: 0,0:11:56.03,0:11:58.35,Default,,0,0,0,,You can't go around telling people to kill\Nthemselves.
+Dialogue: 0,0:11:58.87,0:12:00.07,Default,,0,0,0,,What if I really jumped?
+Dialogue: 0,0:12:00.19,0:12:01.39,Default,,0,0,0,,What would he do then?
+Dialogue: 0,0:12:03.07,0:12:05.51,Default,,0,0,0,,My dreams have turned into fish food.
+Dialogue: 0,0:12:06.59,0:12:07.67,Default,,0,0,0,,That's enough.
+Dialogue: 0,0:12:07.69,0:12:08.89,Default,,0,0,0,,Give it back.
+Dialogue: 0,0:12:09.05,0:12:10.25,Default,,0,0,0,,Damn it.
+Dialogue: 0,0:12:14.31,0:12:15.71,Default,,0,0,0,,Stupid jerk.
+Dialogue: 0,0:12:17.73,0:12:18.97,Default,,0,0,0,,Mom, hurry!
+Dialogue: 0,0:12:20.11,0:12:21.31,Default,,0,0,0,,Time!
+Dialogue: 0,0:12:25.42,0:12:26.62,Default,,0,0,0,,Ready?
+Dialogue: 0,0:12:27.20,0:12:28.78,Default,,0,0,0,,Fester, let's go!
+Dialogue: 0,0:12:29.68,0:12:33.44,Default,,0,0,0,,Jeez, I think you've added 10,000 views to\Nthis one yourself, Izuku.
+Dialogue: 0,0:12:33.44,0:12:35.52,Default,,0,0,0,,I don't know why you like it.
+Dialogue: 0,0:12:35.54,0:12:36.74,Default,,0,0,0,,I think it's scary.
+Dialogue: 0,0:12:36.76,0:12:40.22,Default,,0,0,0,,The video I loved was an old one.
+Dialogue: 0,0:12:40.98,0:12:43.40,Default,,0,0,0,,Disaster footage from a long time ago.
+Dialogue: 0,0:12:44.04,0:12:48.66,Default,,0,0,0,,But more importantly, it was the debut of\Nthe greatest hero the world has ever known.
+Dialogue: 0,0:12:48.92,0:12:50.06,Default,,0,0,0,,Who is this?
+Dialogue: 0,0:12:50.08,0:12:53.80,Default,,0,0,0,,The guys already take 100 people at least,\Nand it hasn't even been 10 minutes.
+Dialogue: 0,0:12:53.92,0:12:55.48,Default,,0,0,0,,This is crazy!
+Dialogue: 0,0:12:56.12,0:12:57.32,Default,,0,0,0,,I can't believe it!
+Dialogue: 0,0:13:31.93,0:13:33.13,Default,,0,0,0,,Universe!
+Dialogue: 0,0:13:33.27,0:13:37.19,Default,,0,0,0,,If one's idea like quirk, I'm gonna be a\Nhero just like him!
+Dialogue: 0,0:13:42.52,0:13:43.74,Default,,0,0,0,,Sorry, kid.
+Dialogue: 0,0:13:43.76,0:13:44.96,Default,,0,0,0,,It's not gonna happen.
+Dialogue: 0,0:13:45.52,0:13:49.08,Default,,0,0,0,,Oh, dear.
+Dialogue: 0,0:13:49.46,0:13:51.70,Default,,0,0,0,,So you really think there's something\Nwrong then?
+Dialogue: 0,0:13:51.98,0:13:55.98,Default,,0,0,0,,Most of the other kindergartners in his\Nclass have begun to show signs already.
+Dialogue: 0,0:13:56.88,0:13:59.70,Default,,0,0,0,,My records say you're a fourth-generation\Nquirk user.
+Dialogue: 0,0:13:59.98,0:14:01.84,Default,,0,0,0,,What powers do you and the boy's father\Nhave?
+Dialogue: 0,0:14:01.84,0:14:03.18,Default,,0,0,0,,Nothing too special.
+Dialogue: 0,0:14:03.68,0:14:06.78,Default,,0,0,0,,I can float small objects towards me and\Nmy husband breathes fire.
+Dialogue: 0,0:14:07.04,0:14:08.96,Default,,0,0,0,,They're useful enough, I suppose.
+Dialogue: 0,0:14:09.28,0:14:13.36,Default,,0,0,0,,Izuku should have already manifested one\Nof these quarks for a combination of both,
+Dialogue: 0,0:14:13.38,0:14:16.08,Default,,0,0,0,,but after viewing his X-rays, I don't\Nthink he's going to.
+Dialogue: 0,0:14:16.56,0:14:20.24,Default,,0,0,0,,You see, when superpowers first began\Nappearing, there were many research
+Dialogue: 0,0:14:20.24,0:14:24.02,Default,,0,0,0,,studies conducted, and doctors discovered\Na link between the bones and a person's
+Dialogue: 0,0:14:24.02,0:14:26.56,Default,,0,0,0,,foot in their likelihood of developing a\Nquirk.
+Dialogue: 0,0:14:26.94,0:14:30.14,Default,,0,0,0,,People with powers have only one joint in\Ntheir pinky toes.
+Dialogue: 0,0:14:30.40,0:14:33.94,Default,,0,0,0,,Their bodies have evolved into a more\Nstreamlined version of the human form.
+Dialogue: 0,0:14:35.10,0:14:37.88,Default,,0,0,0,,You can see here that\NIzuku has two joints in his
+Dialogue: 0,0:14:37.88,0:14:40.88,Default,,0,0,0,,pinky, like roughly 20% of\Nthe population these days.
+Dialogue: 0,0:14:41.74,0:14:44.27,Default,,0,0,0,,Based on the research\Nthat's available, it's safe
+Dialogue: 0,0:14:44.27,0:14:47.10,Default,,0,0,0,,to say your son isn't\Ngoing to develop a quirk.
+Dialogue: 0,0:15:15.14,0:15:18.96,Default,,0,0,0,,There's always a smile on his face,\Nno matter how bad things get.
+Dialogue: 0,0:15:21.82,0:15:25.24,Default,,0,0,0,,Even when things seem impossible,\Nhe never gives up.
+Dialogue: 0,0:15:34.81,0:15:37.01,Default,,0,0,0,,I can be a hero, too.
+Dialogue: 0,0:15:42.45,0:15:44.29,Default,,0,0,0,,I'm sorry, Izuku.
+Dialogue: 0,0:15:44.99,0:15:46.75,Default,,0,0,0,,I wish things were different.
+Dialogue: 0,0:15:50.63,0:15:53.41,Default,,0,0,0,,Mom, that's not what I needed you to say.
+Dialogue: 0,0:15:53.75,0:15:54.55,Default,,0,0,0,,Couldn't you see?
+Dialogue: 0,0:15:54.55,0:15:57.09,Default,,0,0,0,,My world was crumbling.
+Dialogue: 0,0:15:57.73,0:16:00.23,Default,,0,0,0,,There was only one thing I wanted to hear.
+Dialogue: 0,0:16:06.25,0:16:08.03,Default,,0,0,0,,I made a decision that day.
+Dialogue: 0,0:16:08.51,0:16:11.99,Default,,0,0,0,,No matter what anyone else thinks,\NI have to believe in myself.
+Dialogue: 0,0:16:12.77,0:16:14.73,Default,,0,0,0,,And I'll keep smiling, just like him.
+Dialogue: 0,0:16:16.39,0:16:17.59,Default,,0,0,0,,Only
+Dialogue: 0,0:16:32.83,0:16:35.83,Default,,0,0,0,,a perfect skin suit for me to hide in,\Nkid.
+Dialogue: 0,0:16:42.12,0:16:44.72,Default,,0,0,0,,Don't worry, I'm just taking over your\Nbody.
+Dialogue: 0,0:16:45.08,0:16:46.78,Default,,0,0,0,,It'll be easier for both of us.
+Dialogue: 0,0:16:46.80,0:16:50.34,Default,,0,0,0,,If you don't fight back, it'll only hurt\Nfor a minute.
+Dialogue: 0,0:16:50.52,0:16:52.22,Default,,0,0,0,,You'll feel better soon.
+Dialogue: 0,0:16:53.60,0:16:55.22,Default,,0,0,0,,I can't breathe.
+Dialogue: 0,0:16:56.32,0:16:59.38,Default,,0,0,0,,Grab all you want, my body's made of\Nfluid.
+Dialogue: 0,0:17:00.48,0:17:01.82,Default,,0,0,0,,Thanks for the help.
+Dialogue: 0,0:17:02.26,0:17:03.98,Default,,0,0,0,,You're a real hero to me.
+Dialogue: 0,0:17:04.94,0:17:07.12,Default,,0,0,0,,I didn't know he was in this scene.
+Dialogue: 0,0:17:07.34,0:17:10.14,Default,,0,0,0,,I gotta get out of here fast before he\Ntracks me down.
+Dialogue: 0,0:17:10.94,0:17:14.00,Default,,0,0,0,,My body, get it weak.
+Dialogue: 0,0:17:22.79,0:17:24.83,Default,,0,0,0,,This can't be the end.
+Dialogue: 0,0:17:25.61,0:17:26.81,Default,,0,0,0,,So funny.
+Dialogue: 0,0:17:34.17,0:17:38.69,Default,,0,0,0,,Have no fear, you're safe.
+Dialogue: 0,0:17:40.87,0:18:29.96,Default,,0,0,0,,Is that all?
+Dialogue: 0,0:18:36.22,0:18:37.42,Default,,0,0,0,,Hey!
+Dialogue: 0,0:18:37.54,0:18:38.74,Default,,0,0,0,,Wake up!
+Dialogue: 0,0:18:38.90,0:18:40.10,Default,,0,0,0,,Hey!
+Dialogue: 0,0:18:40.22,0:18:42.06,Default,,0,0,0,,Thought we lost you there!
+Dialogue: 0,0:18:45.91,0:18:48.19,Default,,0,0,0,,It looks like you're moving around all\Nright.
+Dialogue: 0,0:18:48.35,0:18:50.03,Default,,0,0,0,,Sorry about that back there.
+Dialogue: 0,0:18:50.25,0:18:52.55,Default,,0,0,0,,I didn't mean to get you caught up in my\NJusticing.
+Dialogue: 0,0:18:52.89,0:18:56.87,Default,,0,0,0,,Usually I pay more attention to keeping\Nbystanders safe, but it turns out the
+Dialogue: 0,0:18:56.87,0:18:59.47,Default,,0,0,0,,city's sewer system is pretty difficult to\Nnavigate.
+Dialogue: 0,0:19:03.07,0:19:05.21,Default,,0,0,0,,Anyway, you were a big help.
+Dialogue: 0,0:19:05.51,0:19:06.51,Default,,0,0,0,,Thank you.
+Dialogue: 0,0:19:06.53,0:19:08.41,Default,,0,0,0,,I've captured the evil doer.
+Dialogue: 0,0:19:10.83,0:19:13.91,Default,,0,0,0,,But the most amazing hero in the entire\Nworld.
+Dialogue: 0,0:19:13.93,0:19:15.83,Default,,0,0,0,,Oh my, the real thing.
+Dialogue: 0,0:19:16.11,0:19:17.23,Default,,0,0,0,,In the flesh.
+Dialogue: 0,0:19:17.25,0:19:18.65,Default,,0,0,0,,Standing right in front of me.
+Dialogue: 0,0:19:19.29,0:19:21.53,Default,,0,0,0,,He looks so much cooler in person.
+Dialogue: 0,0:19:23.75,0:19:24.79,Default,,0,0,0,,Holy crap.
+Dialogue: 0,0:19:24.81,0:19:25.83,Default,,0,0,0,,I gotta get an autograph.
+Dialogue: 0,0:19:25.85,0:19:27.45,Default,,0,0,0,,I gotta plan around here somewhere.
+Dialogue: 0,0:19:27.79,0:19:28.99,Default,,0,0,0,,Please sign my notebook.
+Dialogue: 0,0:19:29.75,0:19:31.41,Default,,0,0,0,,He already did.
+Dialogue: 0,0:19:32.45,0:19:33.65,Default,,0,0,0,,Thank you so much.
+Dialogue: 0,0:19:33.67,0:19:34.61,Default,,0,0,0,,This will be an heirloom.
+Dialogue: 0,0:19:34.63,0:19:36.91,Default,,0,0,0,,A family treasure fasted out for\Ngenerations to come.
+Dialogue: 0,0:19:38.83,0:19:42.49,Default,,0,0,0,,Well, I've got to get this guy to the\Npolice so they can take care of him.
+Dialogue: 0,0:19:42.67,0:19:43.87,Default,,0,0,0,,Stay out of trouble.
+Dialogue: 0,0:19:44.17,0:19:45.37,Default,,0,0,0,,See you around.
+Dialogue: 0,0:19:45.43,0:19:46.45,Default,,0,0,0,,Wait.
+Dialogue: 0,0:19:46.47,0:19:47.67,Default,,0,0,0,,You're leaving?
+Dialogue: 0,0:19:47.93,0:19:48.59,Default,,0,0,0,,Already?
+Dialogue: 0,0:19:48.61,0:19:51.73,Default,,0,0,0,,Pro heroes are constantly fighting time as\Nwell as enemies.
+Dialogue: 0,0:19:53.31,0:19:54.63,Default,,0,0,0,,He can't go yet.
+Dialogue: 0,0:19:55.07,0:19:57.47,Default,,0,0,0,,There are still so many questions I have\Nto ask him.
+Dialogue: 0,0:19:58.93,0:20:00.13,Default,,0,0,0,,Now stand back.
+Dialogue: 0,0:20:00.31,0:20:01.51,Default,,0,0,0,,I'm taking off!
+Dialogue: 0,0:20:02.49,0:20:04.77,Default,,0,0,0,,Thanks for your continued support!
+Dialogue: 0,0:20:10.09,0:20:12.15,Default,,0,0,0,,Hey, hey, hey, what do you think you're\Ndoing?
+Dialogue: 0,0:20:19.52,0:20:20.86,Default,,0,0,0,,Oh, that's a good point.
+Dialogue: 0,0:20:20.88,0:20:24.24,Default,,0,0,0,,I just have a lot of things I want to ask\Nyou personally.
+Dialogue: 0,0:20:24.98,0:20:26.90,Default,,0,0,0,,You're by all time the paper hero.
+Dialogue: 0,0:20:26.90,0:20:28.32,Default,,0,0,0,,Oh my, please.
+Dialogue: 0,0:20:28.52,0:20:30.02,Default,,0,0,0,,Okay, okay.
+Dialogue: 0,0:20:30.24,0:20:30.80,Default,,0,0,0,,I get it.
+Dialogue: 0,0:20:30.82,0:20:32.26,Default,,0,0,0,,Just keep your eyes and mouth shut.
+Dialogue: 0,0:20:32.26,0:20:33.46,Default,,0,0,0,,No!
+Dialogue: 0,0:20:56.84,0:20:59.76,Default,,0,0,0,,Oh, my whole life just flushed before my\Neyes.
+Dialogue: 0,0:21:00.38,0:21:01.70,Default,,0,0,0,,Not a very smart move.
+Dialogue: 0,0:21:02.42,0:21:03.78,Default,,0,0,0,,Bang on the door for a while.
+Dialogue: 0,0:21:03.94,0:21:05.14,Default,,0,0,0,,Someone will let you in.
+Dialogue: 0,0:21:05.16,0:21:06.56,Default,,0,0,0,,Now, I have to go.
+Dialogue: 0,0:21:07.02,0:21:08.30,Default,,0,0,0,,See you on the flip side.
+Dialogue: 0,0:21:08.96,0:21:10.16,Default,,0,0,0,,Wait, not yet.
+Dialogue: 0,0:21:10.40,0:21:11.08,Default,,0,0,0,,One second.
+Dialogue: 0,0:21:11.10,0:21:12.76,Default,,0,0,0,,No, I don't have any time.
+Dialogue: 0,0:21:12.82,0:21:13.84,Default,,0,0,0,,I have to know.
+Dialogue: 0,0:21:13.86,0:21:14.68,Default,,0,0,0,,Sorry, kid.
+Dialogue: 0,0:21:14.70,0:21:15.90,Default,,0,0,0,,It's not going to happen.
+Dialogue: 0,0:21:16.88,0:21:18.32,Default,,0,0,0,,I'm sorry, Zuko.
+Dialogue: 0,0:21:19.16,0:21:20.82,Default,,0,0,0,,I wish things were different.
+Dialogue: 0,0:21:24.62,0:21:26.52,Default,,0,0,0,,The school's already crappy.
+Dialogue: 0,0:21:26.70,0:21:29.58,Default,,0,0,0,,You really want to embarrass it more by\Nfailing so hard.
+Dialogue: 0,0:21:33.19,0:21:35.57,Default,,0,0,0,,Sometimes I do feel like I'm a failure.
+Dialogue: 0,0:21:36.21,0:21:37.67,Default,,0,0,0,,Like there's no hope for me.
+Dialogue: 0,0:21:38.77,0:21:41.81,Default,,0,0,0,,But even so, I'm not going to give up.
+Dialogue: 0,0:21:42.67,0:21:43.87,Default,,0,0,0,,Ever.
+Dialogue: 0,0:21:51.31,0:21:54.67,Default,,0,0,0,,Is it possible to become a hero,\Neven if I don't have a quirk?
+Dialogue: 0,0:21:57.47,0:21:59.69,Default,,0,0,0,,I'm a normal kid without any powers.
+Dialogue: 0,0:22:00.25,0:22:02.63,Default,,0,0,0,,Could I ever hope to be someone like you?
+Dialogue: 0,0:22:14.52,0:22:16.70,Default,,0,0,0,,Meeting All Might was a dream come true.
+Dialogue: 0,0:22:17.30,0:22:18.50,Default,,0,0,0,,A real miracle.
+Dialogue: 0,0:22:18.92,0:22:22.14,Default,,0,0,0,,Standing in front of me was the hero I'd\Nidolized most of my life.
+Dialogue: 0,0:22:23.02,0:22:25.61,Default,,0,0,0,,I didn't realize it at the\Ntime, but that chance
+Dialogue: 0,0:22:25.62,0:22:28.20,Default,,0,0,0,,encounter would change\Nthe course of my future.
+Dialogue: 0,0:24:04.61,0:24:06.63,Default,,0,0,0,,I am here for the next episode preview.
+Dialogue: 0,0:24:07.27,0:24:10.91,Default,,0,0,0,,That goo villain is taking a boy hostage\Nand is running a muck in the town.
+Dialogue: 0,0:24:11.07,0:24:16.59,Default,,0,0,0,,This isn't good, but what I can't use my\Npowers much longer or...
+Dialogue: 0,0:24:17.31,0:24:19.97,Default,,0,0,0,,You're a pathetic fraud, All Might.
+Dialogue: 0,0:24:20.97,0:24:25.93,Default,,0,0,0,,Next time, when it takes to be a hero,\Nwe pose risk our lives for its duty to put
+Dialogue: 0,0:24:25.93,0:24:28.39,Default,,0,0,0,,our quirk to the test and go beyond our\Nlimits.
+Dialogue: 0,0:24:28.93,0:24:30.13,Default,,0,0,0,,Plus, Ultra!
